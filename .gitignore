@@ -1,0 +1,34 @@
+## Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+## 编译输出
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.cache
+
+## NuGet
+packages/
+*.nupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+!**/[Pp]ackages/repositories.config
+
+## 临时文件
+_system~.ini
+*.tmp
+*.temp
+~$*
+Thumbs.db
+
+## 配置文件（包含敏感信息，使用模板替代）
+**/app.config
+!**/app.config.template
+# 请复制 app.config.template 为 app.config 并填入真实配置

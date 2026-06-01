@@ -1,0 +1,216 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8F226992-95B3-41F5-9548-4207D79A5771}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DataBaseOrm</RootNamespace>
+    <AssemblyName>DataBaseOrm</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\MeaningVision_Database\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\MeaningVision_Database\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\..\MeaningVision_Database\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>..\..\MeaningVision_Database\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\..\MeaningVision_Database\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>..\..\MeaningVision_Database\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>database.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Communication">
+      <HintPath>..\..\..\..\..\实施项目\科博特\金手指测试\视觉程序\金手指双语版本加注册机V5\JSZN_Vision\Communication.dll</HintPath>
+    </Reference>
+    <Reference Include="Communication_PLS">
+      <HintPath>..\..\..\..\..\实施项目\科博特\金手指测试\视觉程序\金手指双语版本加注册机V5\JSZN_Vision\Communication_PLS.dll</HintPath>
+    </Reference>
+    <Reference Include="halcondotnet, Version=17.12.0.0, Culture=neutral, PublicKeyToken=4973bed59ddbf2b8, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\实施项目\科博特\金手指测试\视觉程序\金手指双语版本加注册机V5\JSZN_Vision\halcondotnet.dll</HintPath>
+    </Reference>
+    <Reference Include="MySql.Data, Version=6.9.12.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>..\packages\MySql.Data.6.9.12\lib\net45\MySql.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ScrewCommon">
+      <HintPath>..\..\电批Demo-RF\Demo-RF\Demo\bin\Debug\ScrewCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="ScrewModbus">
+      <HintPath>..\..\电批Demo-RF\Demo-RF\Demo\bin\Debug\ScrewModbus.dll</HintPath>
+    </Reference>
+    <Reference Include="ScrewMotion">
+      <HintPath>..\..\电批Demo-RF\Demo-RF\Demo\bin\Debug\ScrewMotion.dll</HintPath>
+    </Reference>
+    <Reference Include="SqlSugar, Version=5.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SqlSugar.5.0.3\lib\SqlSugar.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="TOSHIBA_TEC_PRINT_CLASS">
+      <HintPath>..\..\..\打印机测试\TOSHIBA_TEC_PRINT_CLASS_HF_UHF_精简demo release\WindowsFormsApplication1\TOSHIBA_TEC_PRINT_CLASS.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BarcodeColumnConfig.cs" />
+    <Compile Include="BarcodeConfigManager.cs" />
+    <Compile Include="Communication\DemoUtils.cs" />
+    <Compile Include="Communication\Network_KeyenceBinary.cs" />
+    <Compile Include="Communication\Network_MelsecBinary.cs" />
+    <Compile Include="Communication\Network_ModbusTcp.cs" />
+    <Compile Include="Communication\Network_ModbusTcpH5U.cs" />
+    <Compile Include="Communication\Network_OmronFinsTcp.cs" />
+    <Compile Include="Communication\Network_SiemensS7.cs" />
+    <Compile Include="Communication\PlcCommunicationBase.cs" />
+    <Compile Include="Communication\SerialPort.cs" />
+    <Compile Include="Communication\SerialPort_ModbusRTU.cs" />
+    <Compile Include="Communication\TCPClient.cs" />
+    <Compile Include="Communication\TCPServer.cs" />
+    <Compile Include="Communication\TCPServer2.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Communication\TcpServerConnection.cs" />
+    <Compile Include="Communication\TCPSyncClient.cs" />
+    <Compile Include="Communication\ToshibaPrint.cs" />
+    <Compile Include="CsvHelper.cs" />
+    <Compile Include="CustomControl\EthernetConfig.cs" />
+    <Compile Include="CustomControl\EthernetCtl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CustomControl\EthernetCtl.designer.cs">
+      <DependentUpon>EthernetCtl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControl\SerialConfig.cs" />
+    <Compile Include="CustomControl\SerialCtl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CustomControl\SerialCtl.designer.cs">
+      <DependentUpon>SerialCtl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DatabaseType.cs" />
+    <Compile Include="frmDatabase.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmDatabase.Designer.cs">
+      <DependentUpon>frmDatabase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GlobalsVar.cs" />
+    <Compile Include="Log.cs" />
+    <Compile Include="MySqlSugarHelper.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Screw\ScrewMT.cs" />
+    <EmbeddedResource Include="CustomControl\EthernetCtl.resx">
+      <DependentUpon>EthernetCtl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomControl\SerialCtl.resx">
+      <DependentUpon>SerialCtl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmDatabase.resx">
+      <DependentUpon>frmDatabase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+    <Content Include="database.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
