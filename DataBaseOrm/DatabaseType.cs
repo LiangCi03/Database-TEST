@@ -58,7 +58,7 @@ namespace DataBaseOrm
     public class BarcodeOKRecord
     {
         /// <summary>
-        /// 所有字段的值，key = DbColumnName（如 "主码", "副码1压力" 等）
+        /// 所有字段的值，key = DbColumnName（如 "KSZ码", "副码1压力" 等）
         /// </summary>
         public Dictionary<string, string> Fields { get; set; } = new Dictionary<string, string>();
 

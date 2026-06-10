@@ -88,8 +88,19 @@ namespace DataBaseOrm
             var columns = new List<string>();
             if (config?.Groups == null) return columns;
 
-            foreach (var group in config.Groups)
+            // 顺序：KSZ码 → FSH码1(全部) → FSH码2(全部) → FSH码3(全部) → FSH码4(全部) → KSZ码状态 → 写入时间
+            var groupOrder = new[] { "KSZ码", "FSH码1", "FSH码2", "FSH码3", "FSH码4" };
+
+            // 1. KSZ码：只取第一个字段（条码内容）
+            var mainGroup = config.Groups.FirstOrDefault(g => g.GroupName == "KSZ码");
+            var mainFirst = mainGroup?.Columns?.FirstOrDefault();
+            if (mainFirst != null && !string.IsNullOrWhiteSpace(mainFirst.DbColumnName))
+                columns.Add(mainFirst.DbColumnName);
+
+            // 2. FSH码1~4：每个组的全部字段
+            foreach (var gn in groupOrder.Skip(1)) // 跳过 KSZ码
             {
+                var group = config.Groups.FirstOrDefault(g => g.GroupName == gn);
                 if (group?.Columns == null) continue;
                 foreach (var col in group.Columns)
                 {
@@ -97,6 +108,17 @@ namespace DataBaseOrm
                         columns.Add(col.DbColumnName);
                 }
             }
+
+            // 3. KSZ码 组的其余状态字段
+            if (mainGroup?.Columns != null)
+            {
+                foreach (var col in mainGroup.Columns.Skip(1))
+                {
+                    if (!string.IsNullOrWhiteSpace(col?.DbColumnName) && !columns.Contains(col.DbColumnName))
+                        columns.Add(col.DbColumnName);
+                }
+            }
+
             return columns;
         }
 
@@ -105,9 +127,9 @@ namespace DataBaseOrm
         /// </summary>
         public static string GetMainCodeColumnName(BarcodeConfig config)
         {
-            var mainGroup = config?.Groups?.FirstOrDefault(g => g.GroupName == "主码");
+            var mainGroup = config?.Groups?.FirstOrDefault(g => g.GroupName == "KSZ码");
             var firstCol = mainGroup?.Columns?.FirstOrDefault();
-            return firstCol?.DbColumnName ?? "主码";
+            return firstCol?.DbColumnName ?? "KSZ码";
         }
 
         /// <summary>
@@ -131,6 +153,15 @@ namespace DataBaseOrm
                         string val = "";
                         if (barcodeValues != null && barcodeValues.TryGetValue(valueKey, out string v) && v != null)
                             val = v;
+
+                        // 结果字段转换：1→OK、0→无结果、其他→NG
+                        if (!string.IsNullOrEmpty(col.DbColumnName) && col.DbColumnName.Contains("结果"))
+                        {
+                            if (val == "1") val = "OK";
+                            else if (val == "0") val = "无结果";
+                            else val = "NG";
+                        }
+
                         dict[col.DbColumnName] = val;
                     }
                 }
@@ -145,20 +176,17 @@ namespace DataBaseOrm
         /// </summary>
         public void SyncTableFromConfig(BarcodeConfig config, string customTableName = null)
         {
+            // 必须指定表名，不传则跳过
+            if (string.IsNullOrWhiteSpace(customTableName)) return;
+
             var columns = GetColumnNamesFromConfig(config);
             if (columns.Count == 0) return;
 
             string mainColName = GetMainCodeColumnName(config);
 
-            string[] tableNames = customTableName != null
-                ? new[] { customTableName }
-                : new[] { "OKTable", "NGTable" };
-
-            foreach (var tableName in tableNames)
-            {
-                EnsureDynamicTable(tableName, columns);
-                EnsureMainCodeIndex(tableName, mainColName);
-            }
+            EnsureDynamicTable(customTableName, columns);
+            EnsureMainCodeIndex(customTableName, mainColName);
+            EnsureTimeIndex(customTableName);
         }
 
         /// <summary>
@@ -188,6 +216,26 @@ namespace DataBaseOrm
             {
                 System.Diagnostics.Debug.WriteLine($"为 {tableName}.{mainColName} 创建索引失败: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// 确保 写入时间 列有索引（日期查询加速）
+        /// </summary>
+        private void EnsureTimeIndex(string tableName)
+        {
+            try
+            {
+                string indexName = $"idx_{tableName}_写入时间";
+                if (indexName.Length > 64) indexName = indexName.Substring(0, 64);
+
+                string checkSql = $"SELECT COUNT(*) FROM information_schema.statistics " +
+                    $"WHERE table_schema = DATABASE() AND table_name = '{tableName}' AND index_name = '{indexName}'";
+                if (_sql.Ado.GetInt(checkSql) == 0)
+                {
+                    _sql.Ado.ExecuteCommand($"CREATE INDEX `{indexName}` ON `{tableName}` (`写入时间`)");
+                }
+            }
+            catch { /* 忽略索引创建失败 */ }
         }
 
         /// <summary>
@@ -262,6 +310,23 @@ namespace DataBaseOrm
         }
 
         /// <summary>
+        /// 获取数据库中所有表名
+        /// </summary>
+        public List<string> GetTableNames()
+        {
+            var names = new List<string>();
+            try
+            {
+                string sql = "SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = DATABASE() AND table_type = 'BASE TABLE' ORDER BY TABLE_NAME";
+                var dt = _sql.Ado.GetDataTable(sql);
+                foreach (DataRow row in dt.Rows)
+                    names.Add(row["TABLE_NAME"]?.ToString() ?? "");
+            }
+            catch { }
+            return names;
+        }
+
+        /// <summary>
         /// 按主码精确查询OK表（走索引，加 LIMIT 防全量返回）
         /// </summary>
         /// <param name="mainCode">主码精确值</param>
@@ -269,11 +334,23 @@ namespace DataBaseOrm
         public DataTable QueryOkByMainCode(string mainCode, string mainCodeColumn, string tableName = null)
         {
             if (string.IsNullOrWhiteSpace(mainCodeColumn))
-                mainCodeColumn = "主码";
+                mainCodeColumn = "KSZ码";
             string tbl = string.IsNullOrWhiteSpace(tableName) ? "OKTable" : tableName;
 
             string sql = $"SELECT * FROM `{tbl}` WHERE `{mainCodeColumn}` = @mainCode ORDER BY `写入时间` DESC LIMIT 500";
             var dt = _sql.Ado.GetDataTable(sql, new { mainCode });
+
+            // 兼容旧数据列名"主码"（忽略列不存在的错误）
+            if ((dt == null || dt.Rows.Count == 0) && mainCodeColumn == "KSZ码")
+            {
+                try
+                {
+                    string oldSql = $"SELECT * FROM `{tbl}` WHERE `主码` = @mainCode ORDER BY `写入时间` DESC LIMIT 500";
+                    dt = _sql.Ado.GetDataTable(oldSql, new { mainCode });
+                }
+                catch { /* 旧列不存在，忽略 */ }
+            }
+
             return dt;
         }
 
@@ -286,7 +363,7 @@ namespace DataBaseOrm
         public DataTable QueryNgByMainCode(string mainCode, string mainCodeColumn, string tableName = null)
         {
             if (string.IsNullOrWhiteSpace(mainCodeColumn))
-                mainCodeColumn = "主码";
+                mainCodeColumn = "KSZ码";
             string tbl = string.IsNullOrWhiteSpace(tableName) ? "NGTable" : tableName;
 
             string sql = $"SELECT * FROM `{tbl}` WHERE `{mainCodeColumn}` = @mainCode ORDER BY `写入时间` DESC LIMIT 500";
@@ -295,12 +372,68 @@ namespace DataBaseOrm
         }
 
         /// <summary>
+        /// 全库查询：在所有表中搜索指定KSZ码
+        /// </summary>
+        public DataTable QueryAllTablesByMainCode(string mainCode, string mainCodeColumn,
+            Dictionary<string, string> tableFriendlyNames = null)
+        {
+            if (string.IsNullOrWhiteSpace(mainCodeColumn))
+                mainCodeColumn = "KSZ码";
+
+            var result = new DataTable();
+            result.Columns.Add("来源表", typeof(string));
+
+            try
+            {
+                // 获取数据库中所有表名
+                string showTablesSql = "SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = DATABASE() AND table_type = 'BASE TABLE'";
+                var tablesDt = _sql.Ado.GetDataTable(showTablesSql);
+
+                bool first = true;
+                foreach (DataRow row in tablesDt.Rows)
+                {
+                    string tableName = row["TABLE_NAME"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(tableName)) continue;
+
+                    // 检查表是否有主码列
+                    string colCheckSql = $"SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = @tbl AND column_name = @col";
+                    int colCount = _sql.Ado.GetInt(colCheckSql, new { tbl = tableName, col = mainCodeColumn });
+                    if (colCount == 0) continue;
+
+                    // 友好名称
+                    string friendlyName = tableName;
+                    if (tableFriendlyNames != null && tableFriendlyNames.TryGetValue(tableName, out string fn))
+                        friendlyName = fn;
+
+                    string sql = $"SELECT *, '{friendlyName}' AS 来源表 FROM `{tableName}` WHERE `{mainCodeColumn}` = @mainCode ORDER BY `写入时间` DESC LIMIT 200";
+                    var dt = _sql.Ado.GetDataTable(sql, new { mainCode });
+
+                    if (first)
+                    {
+                        result = dt;
+                        first = false;
+                    }
+                    else if (dt.Rows.Count > 0)
+                    {
+                        result.Merge(dt);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("全库查询失败: " + ex.Message);
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// 按时间范围导出指定表数据
         /// </summary>
         public DataTable ExportTableByDateRange(string tableName, DateTime from, DateTime to)
         {
             string tbl = string.IsNullOrWhiteSpace(tableName) ? "OKTable" : tableName;
-            string sql = $"SELECT * FROM `{tbl}` WHERE `写入时间` >= @from AND `写入时间` <= @to ORDER BY `写入时间` DESC";
+            string sql = $"SELECT * FROM `{tbl}` WHERE `写入时间` >= @from AND `写入时间` <= @to ORDER BY `写入时间` DESC LIMIT 5000";
             var dt = _sql.Ado.GetDataTable(sql, new { from = from.ToString("yyyy-MM-dd HH:mm:ss"), to = to.ToString("yyyy-MM-dd 23:59:59") });
             return dt;
         }

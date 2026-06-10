@@ -49,6 +49,20 @@ namespace DataBaseOrm
         private DataGridView[] _row2Grids;
         private Label[] _row2Titles;
 
+        // 全库查询结果缓存
+        private DataTable _allQueryResult = null;
+        private ComboBox _queryFilterCombo = null;
+
+        // KSZ码状态标签
+        private Label _lblMainStatus;
+        private Label _lblRow2Status;
+        // 各产品码状态缓存（key=产品索引，value=PLC读到的值）
+        private Dictionary<int, string> _codeStatusValues = new Dictionary<int, string>();
+        // 权限管理
+        private bool _isAdmin = false;
+        private System.Windows.Forms.Timer _autoLockTimer;
+        private string _adminPassword = "admin";
+
         /// <summary>
         /// 存储从PLC读取到的所有值，key格式为 "{组名}_{列名}"（如 "主码_压力最大"）
         /// </summary>
@@ -95,11 +109,11 @@ namespace DataBaseOrm
         /// </summary>
         private static readonly Dictionary<string, Panel> GroupParentPanels = new Dictionary<string, Panel>
         {
-            { "主码", null },
-            { "副码1", null },
-            { "副码2", null },
-            { "副码3", null },
-            { "副码4", null }
+            { "KSZ码", null },
+            { "FSH码1", null },
+            { "FSH码2", null },
+            { "FSH码3", null },
+            { "FSH码4", null }
         };
 
         /// <summary>
@@ -108,11 +122,11 @@ namespace DataBaseOrm
         /// </summary>
         private void InitializeDynamicCodePanels()
         {
-            GroupParentPanels["主码"] = pnlMainCode;
-            GroupParentPanels["副码1"] = pnlSub1;
-            GroupParentPanels["副码2"] = pnlSub2;
-            GroupParentPanels["副码3"] = pnlSub3;
-            GroupParentPanels["副码4"] = pnlSub4;
+            GroupParentPanels["KSZ码"] = pnlMainCode;
+            GroupParentPanels["FSH码1"] = pnlSub1;
+            GroupParentPanels["FSH码2"] = pnlSub2;
+            GroupParentPanels["FSH码3"] = pnlSub3;
+            GroupParentPanels["FSH码4"] = pnlSub4;
 
             // 隐藏旧的大号值Label（已被 DataGridView 替代）
             var oldValueLabels = new[] { lblMainCodeValue, lblSubCode1Value, lblSubCode2Value, lblSubCode3Value, lblSubCode4Value };
@@ -138,6 +152,10 @@ namespace DataBaseOrm
             _row2Grids = row2Grids;
             _row2Titles = row2Titles;
 
+            // === 添加 KSZ码 状态标签（OK/NG） ===
+            _lblMainStatus = CreateStatusLabel(pnlMainCode);
+            _lblRow2Status = CreateStatusLabel(pnlRow2Main);
+
             // 隐藏旧的状态标签（设计器中已替换为 tblSummary 双栏布局）
             if (lblMainStatusValue != null) lblMainStatusValue.Visible = false;
             if (lblSubSummaryValue != null) lblSubSummaryValue.Visible = false;
@@ -159,6 +177,63 @@ namespace DataBaseOrm
             }
         }
 
+        /// <summary>
+        /// 创建 KSZ码 状态标签（OK绿/NG红）
+        /// </summary>
+        private Label CreateStatusLabel(Panel parent)
+        {
+            var lbl = new Label
+            {
+                Text = "等待数据...",
+                Dock = DockStyle.Bottom,
+                MinimumSize = new Size(0, 40),
+                Height = 40,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Font = new Font("微软雅黑", 14F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(120, 120, 120),
+                BackColor = Color.FromArgb(245, 245, 245)
+            };
+            parent.Controls.Add(lbl);
+            return lbl;
+        }
+
+        /// <summary>
+        /// 刷新 KSZ码 状态标签（读 txtCodeStatusAddr 地址缓存值）
+        /// </summary>
+        private void UpdateMainStatusLabel(Label lbl, int productIndex)
+        {
+            if (lbl == null) return;
+            string resultVal = null;
+            lock (_barcodeValuesLock)
+            {
+                _codeStatusValues.TryGetValue(productIndex, out resultVal);
+            }
+            if (string.IsNullOrEmpty(resultVal))
+            {
+                lbl.Text = "等待数据...";
+                lbl.ForeColor = Color.FromArgb(120, 120, 120);
+                lbl.BackColor = Color.FromArgb(245, 245, 245);
+            }
+            else if (resultVal == "1")
+            {
+                lbl.Text = "✅ OK";
+                lbl.ForeColor = Color.FromArgb(0, 120, 0);
+                lbl.BackColor = Color.FromArgb(220, 255, 220);
+            }
+            else if (resultVal == "0")
+            {
+                lbl.Text = "无结果";
+                lbl.ForeColor = Color.FromArgb(120, 120, 120);
+                lbl.BackColor = Color.FromArgb(245, 245, 245);
+            }
+            else
+            {
+                lbl.Text = "❌ NG";
+                lbl.ForeColor = Color.FromArgb(180, 30, 30);
+                lbl.BackColor = Color.FromArgb(255, 220, 220);
+            }
+        }
+
         private void SetupDataGridView(DataGridView grid)
         {
             if (grid == null) return;
@@ -166,6 +241,10 @@ namespace DataBaseOrm
             // 固定行高，不换行，水平滚动查看长文本
             grid.RowTemplate.Height = 28;
             grid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            grid.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            grid.AllowUserToOrderColumns = false;  // 禁止拖拽列排序
+            grid.ReadOnly = false;  // 网格可进入，列只读，允许选中部分文本复制
+            grid.EditMode = DataGridViewEditMode.EditOnEnter;
 
             grid.DefaultCellStyle = new DataGridViewCellStyle
             {
@@ -194,14 +273,22 @@ namespace DataBaseOrm
                 grid.Columns.Add(new DataGridViewTextBoxColumn
                 {
                     Name = "FieldName", HeaderText = "字段",
-                    FillWeight = 40, MinimumWidth = 60
+                    FillWeight = 40, MinimumWidth = 60,
+                    SortMode = DataGridViewColumnSortMode.NotSortable,
+                    ReadOnly = true
                 });
                 grid.Columns.Add(new DataGridViewTextBoxColumn
                 {
                     Name = "FieldValue", HeaderText = "值",
-                    FillWeight = 60, MinimumWidth = 80
+                    FillWeight = 60, MinimumWidth = 80,
+                    SortMode = DataGridViewColumnSortMode.NotSortable,
+                    ReadOnly = true
                 });
             }
+
+            // 已有列也设为只读
+            foreach (DataGridViewColumn col in grid.Columns)
+                col.ReadOnly = true;
         }
 
         /// <summary>
@@ -222,8 +309,13 @@ namespace DataBaseOrm
                 return;
             }
 
+            // 主码区域只显示条码内容
+            var displayColumns = groupName == "KSZ码"
+                ? group.Columns.Where(c => c?.DbColumnName == "KSZ码").ToList()
+                : group.Columns;
+
             string productLabel = grid.Tag as string ?? "";
-            int expectedRows = (string.IsNullOrEmpty(productLabel) ? 0 : 1) + group.Columns.Count;
+            int expectedRows = (string.IsNullOrEmpty(productLabel) ? 0 : 1) + displayColumns.Count;
 
             // 只在行数变化时才重建（保留滚动位置）
             if (grid.Rows.Count != expectedRows)
@@ -239,7 +331,7 @@ namespace DataBaseOrm
                     grid.Rows[titleIdx].DefaultCellStyle.BackColor = Color.FromArgb(240, 245, 252);
                 }
 
-                foreach (var col in group.Columns)
+                foreach (var col in displayColumns)
                 {
                     if (col == null) continue;
                     string displayName = string.IsNullOrWhiteSpace(col.DisplayName) ? col.DbColumnName : col.DisplayName;
@@ -249,7 +341,7 @@ namespace DataBaseOrm
 
                     int rowIdx = grid.Rows.Add();
                     grid.Rows[rowIdx].Cells["FieldName"].Value = "  " + displayName;
-                    grid.Rows[rowIdx].Cells["FieldValue"].Value = string.IsNullOrEmpty(val) ? "等待PLC数据..." : val;
+                    grid.Rows[rowIdx].Cells["FieldValue"].Value = FormatDisplayValue(col.DbColumnName, val);
                     grid.Rows[rowIdx].Cells["FieldValue"].Style.ForeColor = string.IsNullOrEmpty(val)
                         ? Color.FromArgb(180, 180, 180) : Color.FromArgb(0, 114, 198);
                 }
@@ -258,9 +350,9 @@ namespace DataBaseOrm
 
             // 行数不变，只更新值
             int rowOffset = string.IsNullOrEmpty(productLabel) ? 0 : 1;
-            for (int i = 0; i < group.Columns.Count; i++)
+            for (int i = 0; i < displayColumns.Count; i++)
             {
-                var col = group.Columns[i];
+                var col = displayColumns[i];
                 if (col == null) continue;
                 string key = BuildBarcodeValueKey(groupName, col.DbColumnName);
                 string val = "";
@@ -269,7 +361,7 @@ namespace DataBaseOrm
                 int rowIdx = rowOffset + i;
                 if (rowIdx < grid.Rows.Count)
                 {
-                    grid.Rows[rowIdx].Cells["FieldValue"].Value = string.IsNullOrEmpty(val) ? "等待PLC数据..." : val;
+                    grid.Rows[rowIdx].Cells["FieldValue"].Value = FormatDisplayValue(col.DbColumnName, val);
                     grid.Rows[rowIdx].Cells["FieldValue"].Style.ForeColor = string.IsNullOrEmpty(val)
                         ? Color.FromArgb(180, 180, 180) : Color.FromArgb(0, 114, 198);
                 }
@@ -279,17 +371,32 @@ namespace DataBaseOrm
             ApplyRowBackgroundByResult(groupName, group, grid, rowOffset);
         }
         /// <summary>
+        /// 格式化显示值：结果字段 1→OK、2→NG
+        /// </summary>
+        private string FormatDisplayValue(string dbColumnName, string val)
+        {
+            if (string.IsNullOrEmpty(val)) return "等待PLC数据...";
+            if (dbColumnName != null && dbColumnName.Contains("结果"))
+            {
+                if (val == "1") return "OK";
+                if (val == "0") return "无结果";
+                return "NG";
+            }
+            return val;
+        }
+
+        /// <summary>
         /// 根据组名获取对应的 DataGridView
         /// </summary>
         private DataGridView GetGridByGroupName(string groupName)
         {
             switch (groupName)
             {
-                case "主码": return dgvMainCode;
-                case "副码1": return dgvSubCode1;
-                case "副码2": return dgvSubCode2;
-                case "副码3": return dgvSubCode3;
-                case "副码4": return dgvSubCode4;
+                case "KSZ码": return dgvMainCode;
+                case "FSH码1": return dgvSubCode1;
+                case "FSH码2": return dgvSubCode2;
+                case "FSH码3": return dgvSubCode3;
+                case "FSH码4": return dgvSubCode4;
                 default: return null;
             }
         }
@@ -300,7 +407,7 @@ namespace DataBaseOrm
         private void ApplyRowBackgroundByResult(string groupName, CodeGroupConfig group, DataGridView grid, int rowOffset)
         {
             // 主码不需要背景色
-            if (groupName == "主码") return;
+            if (groupName == "KSZ码") return;
 
             var resultCol = group.Columns?.FirstOrDefault(c =>
                 c?.DbColumnName != null &&
@@ -312,6 +419,9 @@ namespace DataBaseOrm
             lock (_barcodeValuesLock) { resultVal = _barcodeValues.TryGetValue(key, out string v) && v != null ? v : ""; }
 
             if (string.IsNullOrEmpty(resultVal)) return;
+
+            // 0=无结果：不设背景色；1=OK：绿；其他=NG：红
+            if (resultVal == "0") return;
 
             bool isOk = resultVal == "1" || resultVal.Equals("OK", StringComparison.OrdinalIgnoreCase);
             Color rowBack = isOk ? Color.FromArgb(230, 255, 230) : Color.FromArgb(255, 230, 230);
@@ -347,11 +457,11 @@ namespace DataBaseOrm
                 dgvSubCode2.Tag = products[0].ProductName;
                 dgvSubCode3.Tag = products[0].ProductName;
                 dgvSubCode4.Tag = products[0].ProductName;
-                RefreshGroupGridView("主码");
-                RefreshGroupGridView("副码1");
-                RefreshGroupGridView("副码2");
-                RefreshGroupGridView("副码3");
-                RefreshGroupGridView("副码4");
+                RefreshGroupGridView("KSZ码");
+                RefreshGroupGridView("FSH码1");
+                RefreshGroupGridView("FSH码2");
+                RefreshGroupGridView("FSH码3");
+                RefreshGroupGridView("FSH码4");
             }
 
             // 第二行：推卡夹产品（索引1）
@@ -364,11 +474,11 @@ namespace DataBaseOrm
                 _row2Grids[2].Tag = products[1].ProductName;
                 _row2Grids[3].Tag = products[1].ProductName;
                 _row2Grids[4].Tag = products[1].ProductName;
-                RefreshRow2GridView("主码", 0);
-                RefreshRow2GridView("副码1", 1);
-                RefreshRow2GridView("副码2", 2);
-                RefreshRow2GridView("副码3", 3);
-                RefreshRow2GridView("副码4", 4);
+                RefreshRow2GridView("KSZ码", 0);
+                RefreshRow2GridView("FSH码1", 1);
+                RefreshRow2GridView("FSH码2", 2);
+                RefreshRow2GridView("FSH码3", 3);
+                RefreshRow2GridView("FSH码4", 4);
             }
 
             // 恢复当前产品配置
@@ -412,8 +522,13 @@ namespace DataBaseOrm
                 return;
             }
 
+            // 主码区域只显示条码内容
+            var displayColumns = groupName == "KSZ码"
+                ? group.Columns.Where(c => c?.DbColumnName == "KSZ码").ToList()
+                : group.Columns;
+
             string productLabel = grid.Tag as string ?? "";
-            int expectedRows = (string.IsNullOrEmpty(productLabel) ? 0 : 1) + group.Columns.Count;
+            int expectedRows = (string.IsNullOrEmpty(productLabel) ? 0 : 1) + displayColumns.Count;
 
             // 只在行数变化时才重建
             if (grid.Rows.Count != expectedRows)
@@ -429,7 +544,7 @@ namespace DataBaseOrm
                     grid.Rows[titleIdx].DefaultCellStyle.BackColor = Color.FromArgb(240, 245, 252);
                 }
 
-                foreach (var col in group.Columns)
+                foreach (var col in displayColumns)
                 {
                     if (col == null) continue;
                     string displayName = string.IsNullOrWhiteSpace(col.DisplayName) ? col.DbColumnName : col.DisplayName;
@@ -439,7 +554,7 @@ namespace DataBaseOrm
 
                     int rowIdx = grid.Rows.Add();
                     grid.Rows[rowIdx].Cells["FieldName"].Value = "  " + displayName;
-                    grid.Rows[rowIdx].Cells["FieldValue"].Value = string.IsNullOrEmpty(val) ? "等待PLC数据..." : val;
+                    grid.Rows[rowIdx].Cells["FieldValue"].Value = FormatDisplayValue(col.DbColumnName, val);
                     grid.Rows[rowIdx].Cells["FieldValue"].Style.ForeColor = string.IsNullOrEmpty(val)
                         ? Color.FromArgb(180, 180, 180) : Color.FromArgb(0, 114, 198);
                 }
@@ -448,9 +563,9 @@ namespace DataBaseOrm
 
             // 行数不变，只更新值
             int rowOffset = string.IsNullOrEmpty(productLabel) ? 0 : 1;
-            for (int i = 0; i < group.Columns.Count; i++)
+            for (int i = 0; i < displayColumns.Count; i++)
             {
-                var col = group.Columns[i];
+                var col = displayColumns[i];
                 if (col == null) continue;
                 string key = BuildBarcodeValueKey(groupName, col.DbColumnName);
                 string val = "";
@@ -459,7 +574,7 @@ namespace DataBaseOrm
                 int rowIdx = rowOffset + i;
                 if (rowIdx < grid.Rows.Count)
                 {
-                    grid.Rows[rowIdx].Cells["FieldValue"].Value = string.IsNullOrEmpty(val) ? "等待PLC数据..." : val;
+                    grid.Rows[rowIdx].Cells["FieldValue"].Value = FormatDisplayValue(col.DbColumnName, val);
                     grid.Rows[rowIdx].Cells["FieldValue"].Style.ForeColor = string.IsNullOrEmpty(val)
                         ? Color.FromArgb(180, 180, 180) : Color.FromArgb(0, 114, 198);
                 }
@@ -579,7 +694,7 @@ namespace DataBaseOrm
                     bool isNumeric = dataType == "INT16" || dataType == "INT32" || dataType == "REAL" || dataType == "BYTE";
                     bool isString = dataType == "STRING";
                     bool isResult = colName.Contains("结果") || colName.Contains("状态") || colName.Contains("是否");
-                    bool isBarcode = colName.Contains("主码") || colName.Contains("副码");
+                    bool isBarcode = colName.Contains("KSZ码") || colName.Contains("FSH码");
 
                     if (mode == "full")
                     {
@@ -1190,12 +1305,12 @@ namespace DataBaseOrm
                     return;
                 }
 
-                // 确保表存在（表不存在则自动创建）
+                // 确保表存在
+                string okTable = _multiProductConfig?.Products?.ElementAtOrDefault(_selectedProductIndex)?.OkTableName ?? "OKTable";
                 if (_mySqlSugarHelper != null && _barcodeConfig != null)
-                    _mySqlSugarHelper.SyncTableFromConfig(_barcodeConfig);
+                    _mySqlSugarHelper.SyncTableFromConfig(_barcodeConfig, okTable);
 
                 var dict = BuildRecordFromInputs(inputs);
-                string okTable = _multiProductConfig?.Products?.ElementAtOrDefault(_selectedProductIndex)?.OkTableName ?? "OKTable";
                 _mySqlSugarHelper.InsertOK(dict, okTable);
                 AppendDbDebugLog($"✅ 已写入 {okTable}（{inputs.Count} 个字段）");
                 RecordInformation($"✅ [手动] 已写入 {okTable}（{inputs.Count} 个字段）");
@@ -1221,12 +1336,12 @@ namespace DataBaseOrm
                     return;
                 }
 
-                // 确保表存在（表不存在则自动创建）
+                // 确保表存在
+                string ngTable = _multiProductConfig?.Products?.ElementAtOrDefault(_selectedProductIndex)?.NgTableName ?? "NGTable";
                 if (_mySqlSugarHelper != null && _barcodeConfig != null)
-                    _mySqlSugarHelper.SyncTableFromConfig(_barcodeConfig);
+                    _mySqlSugarHelper.SyncTableFromConfig(_barcodeConfig, ngTable);
 
                 var dict = BuildRecordFromInputs(inputs);
-                string ngTable = _multiProductConfig?.Products?.ElementAtOrDefault(_selectedProductIndex)?.NgTableName ?? "NGTable";
                 _mySqlSugarHelper.InsertNG(dict, ngTable);
                 AppendDbDebugLog($"✅ 已写入 {ngTable}（{inputs.Count} 个字段）");
                 RecordInformation($"✅ [手动] 已写入 {ngTable}（{inputs.Count} 个字段）");
@@ -1509,17 +1624,10 @@ namespace DataBaseOrm
         /// </summary>
         private void InitQueryResultGrids()
         {
-            // 初始化产品选择器
+            // 初始化产品选择器（占位，数据库连接后再加载真实表名）
             if (cmbQueryProduct != null)
             {
                 cmbQueryProduct.Items.Clear();
-                if (_multiProductConfig?.Products != null)
-                {
-                    foreach (var p in _multiProductConfig.Products)
-                        cmbQueryProduct.Items.Add(p.ProductName);
-                }
-                if (cmbQueryProduct.Items.Count > 0)
-                    cmbQueryProduct.SelectedIndex = 0;
             }
 
             // OK结果表格
@@ -1562,18 +1670,7 @@ namespace DataBaseOrm
             if (cmbExportTable != null)
             {
                 cmbExportTable.Items.Clear();
-                var products = _multiProductConfig?.Products;
-                if (products != null)
-                {
-                    foreach (var p in products)
-                    {
-                        cmbExportTable.Items.Add($"{p.ProductName}-OK");
-                        cmbExportTable.Items.Add($"{p.ProductName}-NG");
-                    }
-                }
-                if (cmbExportTable.Items.Count > 0) cmbExportTable.SelectedIndex = 0;
             }
-            if (btnExportCsv != null) btnExportCsv.Click += BtnExportCsv_Click;
         }
 
         /// <summary>
@@ -1588,18 +1685,15 @@ namespace DataBaseOrm
             }
 
             string selected = cmbExportTable.SelectedItem.ToString();
-            string[] parts = selected.Split('-');
-            if (parts.Length != 2) return;
-            string productName = parts[0];
-            string okNg = parts[1];
 
-            // 找到对应产品的表名
-            var product = _multiProductConfig?.Products?.FirstOrDefault(p => p.ProductName == productName);
-            string tableName = okNg == "OK" ? product?.OkTableName : product?.NgTableName;
-            if (string.IsNullOrWhiteSpace(tableName))
+            // 解析 "产品名-OK/NG" → 实际表名
+            string[] parts = selected.Split('-');
+            string tableName = selected;
+            if (parts.Length == 2)
             {
-                MessageBox.Show("未找到对应表名", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                var product = _multiProductConfig?.Products?.FirstOrDefault(p => p.ProductName == parts[0]);
+                tableName = parts[1] == "OK" ? product?.OkTableName : product?.NgTableName;
+                if (string.IsNullOrWhiteSpace(tableName)) tableName = selected;
             }
 
             try
@@ -1744,12 +1838,170 @@ namespace DataBaseOrm
             }
         }
 
+        /// <summary>
+        /// 初始化权限按钮状态
+        /// </summary>
+        private void InitPermissionButton()
+        {
+            LoadAdminPassword();
+
+            if (btnPermission == null) return;
+            btnPermission.Click += (s, e) => SwitchPermission();
+
+            // 修改密码按钮
+            if (btnChangePwd != null)
+                btnChangePwd.Click += (s, e) => ChangeAdminPassword();
+
+            // 按钮始终跟在 lblHeaderTitle 右边
+            PositionPermissionButton();
+            pnlHeader.Resize += (s, e) => PositionPermissionButton();
+            lblHeaderTitle.SizeChanged += (s, e) => PositionPermissionButton();
+
+            // 30分钟自动切回操作员
+            _autoLockTimer = new System.Windows.Forms.Timer { Interval = 30 * 60 * 1000 };
+            _autoLockTimer.Tick += (s, e) =>
+            {
+                if (_isAdmin)
+                {
+                    _isAdmin = false;
+                    this.BeginInvoke(new Action(() => ApplyPermission()));
+                }
+            };
+            _autoLockTimer.Start();
+
+            ApplyPermission();
+        }
+
+        private void PositionPermissionButton()
+        {
+            if (btnPermission == null || lblHeaderTitle == null || pnlHeader == null) return;
+            btnPermission.Location = new Point(
+                lblHeaderTitle.Right + 10,
+                (pnlHeader.Height - btnPermission.Height) / 2);
+            if (btnChangePwd != null)
+                btnChangePwd.Location = new Point(
+                    btnPermission.Right + 8,
+                    (pnlHeader.Height - btnChangePwd.Height) / 2);
+        }
+
+        /// <summary>
+        /// 从配置文件加载管理员密码
+        /// </summary>
+        private void LoadAdminPassword()
+        {
+            try
+            {
+                string path = Application.StartupPath + "\\配置文件\\adminPwd.dat";
+                if (File.Exists(path))
+                {
+                    string pwd = File.ReadAllText(path).Trim();
+                    if (!string.IsNullOrWhiteSpace(pwd)) _adminPassword = pwd;
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// 保存管理员密码到配置文件
+        /// </summary>
+        private void SaveAdminPassword(string pwd)
+        {
+            try
+            {
+                string dir = Application.StartupPath + "\\配置文件";
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                File.WriteAllText(dir + "\\adminPwd.dat", pwd);
+                _adminPassword = pwd;
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// 修改管理员密码
+        /// </summary>
+        private void ChangeAdminPassword()
+        {
+            using (ChangePwdForm pwdForm = new ChangePwdForm())
+            {
+                pwdForm.btnSave.Click += (s, e) =>
+                {
+                    if (pwdForm.OldPassword != _adminPassword)
+                        pwdForm.ShowError("当前密码错误！");
+                    else if (string.IsNullOrWhiteSpace(pwdForm.NewPassword))
+                        pwdForm.ShowError("新密码不能为空！");
+                    else if (pwdForm.NewPassword != pwdForm.ConfirmPassword)
+                        pwdForm.ShowError("两次密码不一致！");
+                    else
+                    {
+                        SaveAdminPassword(pwdForm.NewPassword);
+                        pwdForm.ShowSuccess("密码修改成功！");
+                        var t = new System.Windows.Forms.Timer { Interval = 800 };
+                        t.Tick += (s2, e2) => { t.Stop(); pwdForm.Close(); };
+                        t.Start();
+                    }
+                };
+                pwdForm.ShowDialog();
+            }
+        }
+
+        private void SwitchPermission()
+        {
+            if (_isAdmin)
+            {
+                _isAdmin = false;
+                ApplyPermission();
+            }
+            else
+            {
+                using (LoginForm login = new LoginForm())
+                {
+                    // 循环验证直到密码正确或取消
+                    while (true)
+                    {
+                        if (login.ShowDialog() != DialogResult.OK)
+                            return; // 用户取消
+                        if (login.Password == _adminPassword)
+                        {
+                            _isAdmin = true;
+                            ApplyPermission();
+                            return;
+                        }
+                        login.SetPasswordError("密码错误，请重新输入！");
+                    }
+                }
+            }
+        }
+
+        private void ApplyPermission()
+        {
+            if (tab2 == null) return;
+
+            if (_isAdmin)
+            {
+                if (!tab2.TabPages.Contains(tabPage4)) tab2.TabPages.Add(tabPage4);
+                if (!tab2.TabPages.Contains(tabPage5)) tab2.TabPages.Add(tabPage5);
+                if (!tab2.TabPages.Contains(tabPage6)) tab2.TabPages.Add(tabPage6);
+                btnPermission.Text = "🔓 管理员";
+                btnPermission.BackColor = Color.FromArgb(0, 130, 60);
+                if (btnChangePwd != null) btnChangePwd.Visible = true;
+            }
+            else
+            {
+                tab2.TabPages.Remove(tabPage4);
+                tab2.TabPages.Remove(tabPage5);
+                tab2.TabPages.Remove(tabPage6);
+                btnPermission.Text = "🔒 操作员";
+                btnPermission.BackColor = Color.FromArgb(180, 50, 50);
+                if (btnChangePwd != null) btnChangePwd.Visible = false;
+            }
+        }
+
         #endregion
 
         /// <summary>
         /// 为查询结果 DataGridView 动态创建列
         /// </summary>
-        private void BuildQueryResultColumns(DataGridView grid)
+        private void BuildQueryResultColumns(DataGridView grid, bool addSourceColumn = false)
         {
             if (grid == null) return;
             grid.Columns.Clear();
@@ -1757,6 +2009,29 @@ namespace DataBaseOrm
             grid.AutoGenerateColumns = false;
             grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
             grid.ScrollBars = ScrollBars.Both;
+
+            // 来源表列（全库查询用）
+            if (addSourceColumn)
+            {
+                grid.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    Name = "来源表",
+                    HeaderText = "来源表",
+                    DataPropertyName = "来源表",
+                    Width = 120,
+                    SortMode = DataGridViewColumnSortMode.NotSortable
+                });
+            }
+
+            // 写入时间列（放在最前面）
+            grid.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "写入时间",
+                HeaderText = "写入时间",
+                DataPropertyName = "写入时间",
+                Width = 160,
+                SortMode = DataGridViewColumnSortMode.NotSortable
+            });
 
             var columns = MySqlSugarHelper.GetColumnNamesFromConfig(_barcodeConfig);
             foreach (var colName in columns)
@@ -1771,16 +2046,6 @@ namespace DataBaseOrm
                 };
                 grid.Columns.Add(col);
             }
-            // 写入时间列
-            var timeCol = new DataGridViewTextBoxColumn
-            {
-                Name = "写入时间",
-                HeaderText = "写入时间",
-                DataPropertyName = "写入时间",
-                Width = 160,
-                SortMode = DataGridViewColumnSortMode.NotSortable
-            };
-            grid.Columns.Add(timeCol);
         }
 
         /// <summary>
@@ -1824,21 +2089,69 @@ namespace DataBaseOrm
         }
 
         /// <summary>
-        /// OK查询按钮 - 仅查询OK表（动态列模式，只显示OK面板）
+        /// 从数据库加载真实表名到查询下拉框
+        /// </summary>
+        private void RefreshQueryTableList()
+        {
+            // cmbQueryProduct：显示"产品名-OK/NG"格式（6个选项）
+            if (cmbQueryProduct != null)
+            {
+                cmbQueryProduct.Items.Clear();
+                if (_multiProductConfig?.Products != null)
+                {
+                    foreach (var p in _multiProductConfig.Products)
+                    {
+                        cmbQueryProduct.Items.Add($"{p.ProductName}-OK");
+                        cmbQueryProduct.Items.Add($"{p.ProductName}-NG");
+                    }
+                }
+                if (cmbQueryProduct.Items.Count > 0) cmbQueryProduct.SelectedIndex = 0;
+            }
+
+            // cmbExportTable：显示"产品名-OK/NG"格式
+            if (cmbExportTable != null)
+            {
+                cmbExportTable.Items.Clear();
+                if (_multiProductConfig?.Products != null)
+                {
+                    foreach (var p in _multiProductConfig.Products)
+                    {
+                        cmbExportTable.Items.Add($"{p.ProductName}-OK");
+                        cmbExportTable.Items.Add($"{p.ProductName}-NG");
+                    }
+                }
+                if (cmbExportTable.Items.Count > 0) cmbExportTable.SelectedIndex = 0;
+            }
+        }
+
+        /// <summary>
+        /// 单表查询 - 查询当前选中产品的OK表
         /// </summary>
         private void btnQueryOk_Click(object sender, EventArgs e)
         {
             string code = txtQueryCode?.Text?.Trim();
             if (string.IsNullOrWhiteSpace(code))
             {
-                MessageBox.Show("请输入主码进行查询", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("请输入KSZ码进行查询", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            // 获取当前选中产品的OK表名
-            int selIdx = cmbQueryProduct?.SelectedIndex ?? 0;
-            string productName = _multiProductConfig?.Products?.ElementAtOrDefault(selIdx)?.ProductName ?? "压装";
-            string okTable = _multiProductConfig?.Products?.ElementAtOrDefault(selIdx)?.OkTableName ?? "OKTable";
+            string selected = cmbQueryProduct?.SelectedItem?.ToString();
+            if (string.IsNullOrWhiteSpace(selected))
+            {
+                MessageBox.Show("请选择要查询的表", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            // 解析 "产品名-OK/NG" → 实际表名
+            string[] parts = selected.Split('-');
+            string tableName = selected; // 兜底
+            if (parts.Length == 2)
+            {
+                var product = _multiProductConfig?.Products?.FirstOrDefault(p => p.ProductName == parts[0]);
+                tableName = parts[1] == "OK" ? product?.OkTableName : product?.NgTableName;
+                if (string.IsNullOrWhiteSpace(tableName)) tableName = selected;
+            }
 
             try
             {
@@ -1849,69 +2162,151 @@ namespace DataBaseOrm
                 ShowOnlyOkPanel();
 
                 string mainColName = MySqlSugarHelper.GetMainCodeColumnName(_barcodeConfig);
-                DataTable dtOk = _mySqlSugarHelper.QueryOkByMainCode(code, mainColName, okTable);
+                DataTable dtOk = _mySqlSugarHelper.QueryOkByMainCode(code, mainColName, tableName);
                 if (dgvOkResult != null)
                 {
                     dgvOkResult.DataSource = dtOk;
                     lblOkTitle.Text = dtOk != null && dtOk.Rows.Count > 0
-                        ? $"  ✅ {productName} OK（{dtOk.Rows.Count} 条）"
-                        : $"  ✅ {productName} OK（无结果）";
+                        ? $"  ✅ {selected} → {tableName}（{dtOk.Rows.Count} 条）"
+                        : $"  ⚠️ {selected} → {tableName} 列={mainColName} 无结果";
                 }
 
-                btnQueryOk.Text = "🔍 OK查询";
+                btnQueryOk.Text = "🔍 单表查询";
                 btnQueryOk.Enabled = true;
             }
             catch (Exception ex)
             {
-                btnQueryOk.Text = "🔍 OK查询";
+                btnQueryOk.Text = "🔍 单表查询";
                 btnQueryOk.Enabled = true;
                 MessageBox.Show("查询失败：" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         /// <summary>
-        /// NG查询按钮 - 查询当前选中产品的NG表
+        /// 全库查询 - 在数据库所有表中搜索KSZ码，按表分开显示
         /// </summary>
         private void btnQueryNg_Click(object sender, EventArgs e)
         {
             string code = txtQueryCode?.Text?.Trim();
             if (string.IsNullOrWhiteSpace(code))
             {
-                MessageBox.Show("请输入主码进行查询", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("请输入KSZ码进行查询", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-
-            // 获取当前选中产品的NG表名
-            int selIdx = cmbQueryProduct?.SelectedIndex ?? 0;
-            string productName = _multiProductConfig?.Products?.ElementAtOrDefault(selIdx)?.ProductName ?? "压装";
-            string ngTable = _multiProductConfig?.Products?.ElementAtOrDefault(selIdx)?.NgTableName ?? "NGTable";
 
             try
             {
                 btnQueryNg.Enabled = false;
                 btnQueryNg.Text = "⏳ 查询中...";
 
-                BuildQueryResultColumns(dgvNgResult);
+                BuildQueryResultColumns(dgvNgResult, true);
                 ShowOnlyNgPanel();
 
                 string mainColName = MySqlSugarHelper.GetMainCodeColumnName(_barcodeConfig);
-                DataTable dtNg = _mySqlSugarHelper.QueryNgByMainCode(code, mainColName, ngTable);
-                if (dgvNgResult != null)
+                // 构建表名→友好名映射
+                var nameMap = new Dictionary<string, string>();
+                if (_multiProductConfig?.Products != null)
                 {
-                    dgvNgResult.DataSource = dtNg;
-                    lblNgTitle.Text = dtNg != null && dtNg.Rows.Count > 0
-                        ? $"  ❌ {productName} NG（{dtNg.Rows.Count} 条）"
-                        : $"  ❌ {productName} NG（无结果）";
+                    foreach (var p in _multiProductConfig.Products)
+                    {
+                        if (!string.IsNullOrWhiteSpace(p.OkTableName))
+                            nameMap[p.OkTableName] = $"{p.ProductName}-OK";
+                        if (!string.IsNullOrWhiteSpace(p.NgTableName))
+                            nameMap[p.NgTableName] = $"{p.ProductName}-NG";
+                    }
                 }
 
-                btnQueryNg.Text = "🔍 NG查询";
+                _allQueryResult = _mySqlSugarHelper.QueryAllTablesByMainCode(code, mainColName, nameMap);
+
+                // 提取所有来源表
+                var tableNames = new List<string> { "全部" };
+                if (_allQueryResult?.Rows != null)
+                {
+                    foreach (DataRow row in _allQueryResult.Rows)
+                    {
+                        string tn = row["来源表"]?.ToString();
+                        if (!string.IsNullOrWhiteSpace(tn) && !tableNames.Contains(tn))
+                            tableNames.Add(tn);
+                    }
+                }
+
+                // 创建/更新表过滤下拉框
+                var cmbFilter = EnsureQueryFilterCombo();
+                cmbFilter.Items.Clear();
+                foreach (var tn in tableNames) cmbFilter.Items.Add(tn);
+                cmbFilter.SelectedIndex = 0;
+
+                // 显示全部结果
+                FilterQueryResult("全部");
+
+                int count = _allQueryResult?.Rows?.Count ?? 0;
+                lblNgTitle.Text = count > 0
+                    ? $"  🔍 全库查询（{count} 条，{tableNames.Count - 1} 个表）"
+                    : "  🔍 全库查询（无结果）";
+
+                btnQueryNg.Text = "🔍 全库查询";
                 btnQueryNg.Enabled = true;
             }
             catch (Exception ex)
             {
-                btnQueryNg.Text = "🔍 NG查询";
+                btnQueryNg.Text = "🔍 全库查询";
                 btnQueryNg.Enabled = true;
                 MessageBox.Show("查询失败：" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 全库查询结果表过滤下拉框（动态创建在NG标题栏右侧）
+        /// </summary>
+        private ComboBox EnsureQueryFilterCombo()
+        {
+            if (_queryFilterCombo == null)
+            {
+                _queryFilterCombo = new ComboBox
+                {
+                    DropDownStyle = ComboBoxStyle.DropDownList,
+                    Font = new Font("微软雅黑", 10F),
+                    Width = 160
+                };
+                _queryFilterCombo.SelectedIndexChanged += (s, ev) =>
+                {
+                    if (_queryFilterCombo.SelectedItem != null)
+                        FilterQueryResult(_queryFilterCombo.SelectedItem.ToString());
+                };
+
+                // 放到 NG 标题栏右边
+                if (lblNgTitle?.Parent != null)
+                {
+                    lblNgTitle.Parent.Controls.Add(_queryFilterCombo);
+                    _queryFilterCombo.Location = new Point(
+                        lblNgTitle.Right - _queryFilterCombo.Width - 10,
+                        lblNgTitle.Top + (lblNgTitle.Height - _queryFilterCombo.Height) / 2);
+                    _queryFilterCombo.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+                }
+            }
+            return _queryFilterCombo;
+        }
+
+        /// <summary>
+        /// 根据选中的来源表过滤全库查询结果
+        /// </summary>
+        private void FilterQueryResult(string tableFilter)
+        {
+            if (_allQueryResult == null || dgvNgResult == null) return;
+
+            if (tableFilter == "全部")
+            {
+                dgvNgResult.DataSource = _allQueryResult;
+            }
+            else
+            {
+                var filtered = _allQueryResult.Clone();
+                foreach (DataRow row in _allQueryResult.Rows)
+                {
+                    if (row["来源表"]?.ToString() == tableFilter)
+                        filtered.ImportRow(row);
+                }
+                dgvNgResult.DataSource = filtered;
             }
         }
 
@@ -1959,23 +2354,37 @@ namespace DataBaseOrm
             // 初始化开机自启选项
             InitAutoStart();
 
+            // 初始化权限切换按钮
+            InitPermissionButton();
+
             Control.CheckForIllegalCrossThreadCalls = false;
             string sql = ConfigurationManager.ConnectionStrings["DefaultConnection"]?.ConnectionString
                 ?? "server=localhost;User Id=root;password=YOUR_PASSWORD_HERE;Database=YOUR_DATABASE_NAME;SslMode=none;AllowPublicKeyRetrieval=True;Charset=utf8";
             _mySqlSugarHelper = new MySqlSugarHelper(sql);
 
-            // 根据条码配置同步数据库表结构（对所有产品及各自的表名）
-            if (_multiProductConfig?.Products != null)
+            // 同步数据库表结构（自启时MySQL可能未就绪，容错处理）
+            try
             {
-                foreach (var p in _multiProductConfig.Products)
+                if (_multiProductConfig?.Products != null)
                 {
-                    if (p?.BarcodeConfig != null)
+                    foreach (var p in _multiProductConfig.Products)
                     {
-                        _mySqlSugarHelper.SyncTableFromConfig(p.BarcodeConfig, p.OkTableName);
-                        _mySqlSugarHelper.SyncTableFromConfig(p.BarcodeConfig, p.NgTableName);
+                        if (p?.BarcodeConfig != null)
+                        {
+                            _mySqlSugarHelper.SyncTableFromConfig(p.BarcodeConfig, p.OkTableName);
+                            _mySqlSugarHelper.SyncTableFromConfig(p.BarcodeConfig, p.NgTableName);
+                        }
                     }
                 }
+
+                // 加载数据库真实表名到查询下拉框
+                RefreshQueryTableList();
             }
+            catch (Exception ex)
+            {
+                RecordInformation("⚠️ 数据库初始化失败（可能MySQL未启动）: " + ex.Message);
+            }
+
             //加载通信参数
             // ReadCommunicationConfig();
             //  LoadComunicationControlParam();
@@ -2173,7 +2582,10 @@ namespace DataBaseOrm
 
             // 同步数据库表结构
             if (_mySqlSugarHelper != null && _barcodeConfig != null)
-                _mySqlSugarHelper.SyncTableFromConfig(_barcodeConfig);
+            {
+                _mySqlSugarHelper.SyncTableFromConfig(_barcodeConfig, product.OkTableName);
+                _mySqlSugarHelper.SyncTableFromConfig(_barcodeConfig, product.NgTableName);
+            }
         }
 
         /// <summary>
@@ -2792,7 +3204,10 @@ namespace DataBaseOrm
                                 _allBarcodeValues[pi] = new Dictionary<string, string>(_barcodeValues);
                             }
 
-                            CheckAndWriteBarcodeStatusForProduct(product);
+                            // 读取码状态（必须在写库前面，确保用当前值判断）
+                            ReadCodeStatusForProduct(product, pi);
+
+                            CheckAndWriteBarcodeStatusForProduct(product, pi);
                             WriteEnableReadCompleteForProduct(product);
 
                             _barcodeConfig = savedConfig;
@@ -2879,6 +3294,27 @@ namespace DataBaseOrm
         }
 
         /// <summary>
+        /// 读取码状态地址并缓存（用于UI状态标签和写库判断）
+        /// </summary>
+        private void ReadCodeStatusForProduct(ProductConfig product, int productIndex)
+        {
+            string addr = product?.CodeStatusAddress;
+            if (string.IsNullOrWhiteSpace(addr)) return;
+            try
+            {
+                string addrType = ParseAddressType(addr);
+                uint addrOffset = ParseAddressOffset(addr);
+                int value = _siemensS7.ReadRegisterInt16(addrType, addrOffset);
+                RecordInformation($"[{product.ProductName}] 码状态地址 {addr}={value}");
+                lock (_barcodeValuesLock)
+                {
+                    _codeStatusValues[productIndex] = value.ToString();
+                }
+            }
+            catch (Exception ex) { RecordInformation($"[{product.ProductName}] 读取码状态地址 {addr} 失败: {ex.Message}"); }
+        }
+
+        /// <summary>
         /// 回写指定产品的允许读取地址为2
         /// </summary>
         private void WriteEnableReadCompleteForProduct(ProductConfig product)
@@ -2898,16 +3334,26 @@ namespace DataBaseOrm
         }
 
         /// <summary>
-        /// 根据压装总成状态写库：1=OK表，其他=NG表
+        /// 根据码状态地址值写库：1=OK表，其他=NG表
         /// </summary>
-        private void CheckAndWriteBarcodeStatusForProduct(ProductConfig product)
+        private void CheckAndWriteBarcodeStatusForProduct(ProductConfig product, int productIndex = -1)
         {
             Dictionary<string, object> insertDict;
-            string statusVal;
+            string statusVal = "";
             lock (_barcodeValuesLock)
             {
                 insertDict = MySqlSugarHelper.BuildInsertDictFromBarcodeValues(_barcodeValues, product.BarcodeConfig);
-                statusVal = _barcodeValues.TryGetValue("主码_压装总成状态", out string v) ? v : "";
+                if (productIndex >= 0)
+                    _codeStatusValues.TryGetValue(productIndex, out statusVal);
+            }
+
+            // 兼容：没读到码状态时，回退读压装总成状态
+            if (string.IsNullOrEmpty(statusVal))
+            {
+                lock (_barcodeValuesLock)
+                {
+                    statusVal = _barcodeValues.TryGetValue("KSZ码_压装总成状态", out string v) ? v : "";
+                }
             }
 
             bool isOk = statusVal == "1";
@@ -2919,7 +3365,7 @@ namespace DataBaseOrm
                     _mySqlSugarHelper.InsertOK(insertDict, tableName);
                 else
                     _mySqlSugarHelper.InsertNG(insertDict, tableName);
-                RecordInformation($"[{product.ProductName}] 总成状态={statusVal}，已写入{tableName}");
+                RecordInformation($"[{product.ProductName}] 码状态地址 {product.CodeStatusAddress}={statusVal}，已写入{tableName}");
             }
             catch (Exception ex) { RecordInformation($"[{product.ProductName}] 写入{tableName}失败：" + ex.Message); }
         }
@@ -3226,7 +3672,7 @@ namespace DataBaseOrm
                 txtDisText.Clear();
             }
 
-            string writeData = DateTime.Now.ToString("HH:mm:ss :fff") + " " + data + Environment.NewLine;
+            string writeData = DateTime.Now.ToString("HH:mm:ss :fff") + " " + data + Environment.NewLine + Environment.NewLine;
             Log.WriteLog(InfoLevel.INFO, writeData);
 
             Color logColor = GetLogColor(data);
@@ -3421,9 +3867,18 @@ namespace DataBaseOrm
                 SaveColumnConfigToJson();
                 RecordInformation("✅ 配置已保存到: " + BarcodeConfigManager.GetConfigDir());
 
-                // 3. 同步数据库表结构（新增/修改字段后自动补充列）
-                if (_mySqlSugarHelper != null)
-                    _mySqlSugarHelper.SyncTableFromConfig(_barcodeConfig);
+                // 3. 同步数据库表结构
+                if (_mySqlSugarHelper != null && _multiProductConfig?.Products != null)
+                {
+                    foreach (var p in _multiProductConfig.Products)
+                    {
+                        if (p?.BarcodeConfig != null)
+                        {
+                            _mySqlSugarHelper.SyncTableFromConfig(p.BarcodeConfig, p.OkTableName);
+                            _mySqlSugarHelper.SyncTableFromConfig(p.BarcodeConfig, p.NgTableName);
+                        }
+                    }
+                }
 
                 // 4. 刷新查询结果表格列结构（动态列随配置变化）
                 InitQueryResultGrids();
@@ -3496,7 +3951,7 @@ namespace DataBaseOrm
                 return;
             }
 
-            SaveProductNameCSVParams();
+            //SaveProductNameCSVParams();
 
         }
 
@@ -3520,10 +3975,7 @@ namespace DataBaseOrm
 
                 }
 
-                //GlobalsVar._imageFolderPath = Convert.ToString(dataTable.Rows[0][1]);
-                //_imageSaveDays = Convert.ToUInt16(dataTable.Rows[1][1]);
-                //_imageSaveSizes = Convert.ToUInt16(dataTable.Rows[2][1]);
-                //_currentProductName = Convert.ToString(dataTable.Rows[3][1]);
+                
 
             }
             catch (Exception ex)
@@ -3609,22 +4061,26 @@ namespace DataBaseOrm
             if (lblMainCodeValue == null) return;
 
             // 获取各组第一个字段的值（用于状态显示和汇总）
-            string mainCodeVal = GetGroupFirstValue("主码");
+            string mainCodeVal = GetGroupFirstValue("KSZ码");
 
             // 刷新所有码组的动态显示面板（显示该组所有配置字段）
             RefreshAllGroupGrids();
 
+            // 更新 KSZ码 状态标签（各自读各自产品的数据）
+            UpdateMainStatusLabel(_lblMainStatus, 0);
+            UpdateMainStatusLabel(_lblRow2Status, 1);
+
             // 更新第一行压装标题状态（固定读 _allBarcodeValues[0]，不受当前选中产品影响）
-            UpdateProductGroupTitleStatus(0, "主码", lblMainCodeTitle);
-            UpdateProductGroupTitleStatus(0, "副码1", lblSub1Title);
-            UpdateProductGroupTitleStatus(0, "副码2", lblSub2Title);
-            UpdateProductGroupTitleStatus(0, "副码3", lblSub3Title);
-            UpdateProductGroupTitleStatus(0, "副码4", lblSub4Title);
+            UpdateProductGroupTitleStatus(0, "KSZ码", lblMainCodeTitle);
+            UpdateProductGroupTitleStatus(0, "FSH码1", lblSub1Title);
+            UpdateProductGroupTitleStatus(0, "FSH码2", lblSub2Title);
+            UpdateProductGroupTitleStatus(0, "FSH码3", lblSub3Title);
+            UpdateProductGroupTitleStatus(0, "FSH码4", lblSub4Title);
 
             // 更新第二行推卡夹标题状态（固定读 _allBarcodeValues[1]）
             if (_row2Titles != null)
             {
-                string[] groupNames = { "主码", "副码1", "副码2", "副码3", "副码4" };
+                string[] groupNames = { "KSZ码", "FSH码1", "FSH码2", "FSH码3", "FSH码4" };
                 for (int i = 0; i < _row2Titles.Length && i < groupNames.Length; i++)
                 {
                     UpdateProductGroupTitleStatus(1, groupNames[i], _row2Titles[i]);
@@ -3649,7 +4105,7 @@ namespace DataBaseOrm
             // --- 压装产品（索引0）---
             if (products.Count > 0 && lblProduct1Status != null)
             {
-                string p1MainCode = GetProductGroupFirstValue(0, "主码");
+                string p1MainCode = GetProductGroupFirstValue(0, "KSZ码");
                 bool p1HasMain = !string.IsNullOrWhiteSpace(p1MainCode);
 
                 if (_plcConnected)
@@ -3681,7 +4137,7 @@ namespace DataBaseOrm
             // --- 推卡夹产品（索引1）---
             if (products.Count > 1 && lblProduct2Status != null)
             {
-                string p2MainCode = GetProductGroupFirstValue(1, "主码");
+                string p2MainCode = GetProductGroupFirstValue(1, "KSZ码");
                 bool p2HasMain = !string.IsNullOrWhiteSpace(p2MainCode);
 
                 if (_plcConnected)
@@ -3769,7 +4225,7 @@ namespace DataBaseOrm
         private string BuildProductSubCodeSummary(int productIndex)
         {
             var parts = new List<string>();
-            string[] subNames = { "副码1", "副码2", "副码3", "副码4" };
+            string[] subNames = { "FSH码1", "FSH码2", "FSH码3", "FSH码4" };
             foreach (var name in subNames)
             {
                 string resultVal = GetProductGroupResultValue(productIndex, name);
@@ -3784,7 +4240,7 @@ namespace DataBaseOrm
                 }
             }
 
-            string prefix = "副码：";
+            string prefix = "FSH码：";
             if (parts.Count == 0)
                 return prefix + "等待PLC数据...";
             // 紧凑格式：副码：✅ ❌ · ✅
@@ -3796,7 +4252,7 @@ namespace DataBaseOrm
         /// </summary>
         private bool HasAnySubResult(int productIndex)
         {
-            string[] subNames = { "副码1", "副码2", "副码3", "副码4" };
+            string[] subNames = { "FSH码1", "FSH码2", "FSH码3", "FSH码4" };
             foreach (var name in subNames)
             {
                 if (!string.IsNullOrWhiteSpace(GetProductGroupResultValue(productIndex, name)))
@@ -3909,15 +4365,15 @@ namespace DataBaseOrm
         private string BuildSubCodeSummary()
         {
             var parts = new List<string>();
-            AddSubSummaryPart(parts, "副码1");
-            AddSubSummaryPart(parts, "副码2");
-            AddSubSummaryPart(parts, "副码3");
-            AddSubSummaryPart(parts, "副码4");
+            AddSubSummaryPart(parts, "FSH码1");
+            AddSubSummaryPart(parts, "FSH码2");
+            AddSubSummaryPart(parts, "FSH码3");
+            AddSubSummaryPart(parts, "FSH码4");
 
             if (parts.Count == 0)
-                return "副码结果汇总：等待PLC数据...";
+                return "FSH码结果汇总：等待PLC数据...";
 
-            return "副码结果汇总：" + string.Join("  |  ", parts);
+            return "FSH码结果汇总：" + string.Join("  |  ", parts);
         }
 
         private void AddSubSummaryPart(List<string> parts, string name)
@@ -4180,7 +4636,7 @@ private void tabPage1_Resize(object sender, EventArgs e)
         /// </summary>
         private void LoadConfigToUI()
         {
-            _selectedGroupName = "主码";
+            _selectedGroupName = "KSZ码";
             // 先填充 DGV（避免 SelectedIndexChanged 事件在空 DGV 时误保存）
             LoadSelectedGroupToGrid();
             // 再同步列表选择（不触发保存，因为 _isLoadingProduct=true）
@@ -4192,5 +4648,56 @@ private void tabPage1_Resize(object sender, EventArgs e)
             }
         }
 
+        /// <summary>
+        /// 日期查询按钮 - 按选中表和日期范围查询数据
+        /// </summary>
+        private void btnDateQuery_Click(object sender, EventArgs e)
+        {
+            if (cmbExportTable?.SelectedItem == null)
+            {
+                MessageBox.Show("请选择要查询的表", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 解析 "产品名-OK/NG" → 实际表名
+            string selected = cmbExportTable.SelectedItem.ToString();
+            string[] parts = selected.Split('-');
+            string tableName = selected;
+            if (parts.Length == 2)
+            {
+                var product = _multiProductConfig?.Products?.FirstOrDefault(p => p.ProductName == parts[0]);
+                tableName = parts[1] == "OK" ? product?.OkTableName : product?.NgTableName;
+                if (string.IsNullOrWhiteSpace(tableName)) tableName = selected;
+            }
+
+            DateTime from = dtpExportFrom?.Value ?? DateTime.Today.AddMonths(-1);
+            DateTime to = dtpExportTo?.Value ?? DateTime.Today;
+
+            try
+            {
+                button1.Enabled = false;
+                button1.Text = "⏳ 查询中...";
+
+                BuildQueryResultColumns(dgvOkResult);
+                ShowOnlyOkPanel();
+
+                DataTable dt = _mySqlSugarHelper.ExportTableByDateRange(tableName, from, to);
+
+                dgvOkResult.DataSource = dt;
+                int count = dt?.Rows?.Count ?? 0;
+                lblOkTitle.Text = count > 0
+                    ? $"  📅 {selected}  {from:yyyy-MM-dd} ~ {to:yyyy-MM-dd}（{count} 条）"
+                    : $"  📅 {selected}（无结果）";
+
+                button1.Text = "🔍 日期查询";
+                button1.Enabled = true;
+            }
+            catch (Exception ex)
+            {
+                button1.Text = "🔍 日期查询";
+                button1.Enabled = true;
+                MessageBox.Show("查询失败：" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }

@@ -112,6 +112,7 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
@@ -124,6 +125,12 @@
   <ItemGroup>
     <Compile Include="BarcodeColumnConfig.cs" />
     <Compile Include="BarcodeConfigManager.cs" />
+    <Compile Include="ChangePwdForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChangePwdForm.Designer.cs">
+      <DependentUpon>ChangePwdForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Communication\DemoUtils.cs" />
     <Compile Include="Communication\Network_KeyenceBinary.cs" />
     <Compile Include="Communication\Network_MelsecBinary.cs" />
@@ -166,6 +173,12 @@
     </Compile>
     <Compile Include="GlobalsVar.cs" />
     <Compile Include="Log.cs" />
+    <Compile Include="LoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LoginForm.Designer.cs">
+      <DependentUpon>LoginForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MySqlSugarHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

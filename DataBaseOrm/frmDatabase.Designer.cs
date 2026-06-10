@@ -1,4 +1,4 @@
-namespace DataBaseOrm
+﻿namespace DataBaseOrm
 {
     partial class frmDatabase
     {
@@ -42,7 +42,10 @@ namespace DataBaseOrm
             this.lblHeaderTitle = new System.Windows.Forms.Label();
             this.btnToggleLog = new System.Windows.Forms.Button();
             this.lblPlcHeartbeat = new System.Windows.Forms.Label();
+            this.btnChangePwd = new System.Windows.Forms.Button();
+            this.btnPermission = new System.Windows.Forms.Button();
             this.tblCodes = new System.Windows.Forms.TableLayoutPanel();
+            this.lblSection1 = new System.Windows.Forms.Label();
             this.pnlMainCode = new System.Windows.Forms.Panel();
             this.dgvMainCode = new System.Windows.Forms.DataGridView();
             this.lblMainCodeTitle = new System.Windows.Forms.Label();
@@ -58,6 +61,7 @@ namespace DataBaseOrm
             this.pnlSub4 = new System.Windows.Forms.Panel();
             this.dgvSubCode4 = new System.Windows.Forms.DataGridView();
             this.lblSub4Title = new System.Windows.Forms.Label();
+            this.lblSection2 = new System.Windows.Forms.Label();
             this.pnlRow2Main = new System.Windows.Forms.Panel();
             this.dgvRow2Main = new System.Windows.Forms.DataGridView();
             this.lblRow2MainTitle = new System.Windows.Forms.Label();
@@ -88,6 +92,8 @@ namespace DataBaseOrm
             this.lblNgTitle = new System.Windows.Forms.Label();
             this.dgvNgResult = new System.Windows.Forms.DataGridView();
             this.pnlQueryTop = new System.Windows.Forms.Panel();
+            this.button1 = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
             this.lblQueryTitle = new System.Windows.Forms.Label();
             this.btnQueryNg = new System.Windows.Forms.Button();
             this.btnQueryOk = new System.Windows.Forms.Button();
@@ -98,6 +104,7 @@ namespace DataBaseOrm
             this.dtpExportFrom = new System.Windows.Forms.DateTimePicker();
             this.lblExportTo = new System.Windows.Forms.Label();
             this.dtpExportTo = new System.Windows.Forms.DateTimePicker();
+            this.lblQueryHelp = new System.Windows.Forms.Label();
             this.cmbExportTable = new System.Windows.Forms.ComboBox();
             this.btnExportCsv = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -352,6 +359,8 @@ namespace DataBaseOrm
             this.pnlHeader.Controls.Add(this.lblHeaderTitle);
             this.pnlHeader.Controls.Add(this.btnToggleLog);
             this.pnlHeader.Controls.Add(this.lblPlcHeartbeat);
+            this.pnlHeader.Controls.Add(this.btnChangePwd);
+            this.pnlHeader.Controls.Add(this.btnPermission);
             this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlHeader.Location = new System.Drawing.Point(3, 3);
             this.pnlHeader.Name = "pnlHeader";
@@ -408,6 +417,36 @@ namespace DataBaseOrm
             this.lblPlcHeartbeat.Text = "● PLC离线";
             this.lblPlcHeartbeat.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // btnChangePwd
+            // 
+            this.btnChangePwd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnChangePwd.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.btnChangePwd.FlatAppearance.BorderSize = 0;
+            this.btnChangePwd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnChangePwd.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
+            this.btnChangePwd.ForeColor = System.Drawing.Color.White;
+            this.btnChangePwd.Location = new System.Drawing.Point(421, 4);
+            this.btnChangePwd.Name = "btnChangePwd";
+            this.btnChangePwd.Size = new System.Drawing.Size(133, 47);
+            this.btnChangePwd.TabIndex = 3;
+            this.btnChangePwd.Text = "🔒 修改密码";
+            this.btnChangePwd.UseVisualStyleBackColor = false;
+            // 
+            // btnPermission
+            // 
+            this.btnPermission.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnPermission.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.btnPermission.FlatAppearance.BorderSize = 0;
+            this.btnPermission.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnPermission.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
+            this.btnPermission.ForeColor = System.Drawing.Color.White;
+            this.btnPermission.Location = new System.Drawing.Point(282, 4);
+            this.btnPermission.Name = "btnPermission";
+            this.btnPermission.Size = new System.Drawing.Size(133, 47);
+            this.btnPermission.TabIndex = 3;
+            this.btnPermission.Text = "🔒 操作员";
+            this.btnPermission.UseVisualStyleBackColor = false;
+            // 
             // tblCodes
             // 
             this.tblCodes.ColumnCount = 5;
@@ -416,24 +455,42 @@ namespace DataBaseOrm
             this.tblCodes.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tblCodes.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tblCodes.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tblCodes.Controls.Add(this.pnlMainCode, 0, 0);
-            this.tblCodes.Controls.Add(this.pnlSub1, 1, 0);
-            this.tblCodes.Controls.Add(this.pnlSub2, 2, 0);
-            this.tblCodes.Controls.Add(this.pnlSub3, 3, 0);
-            this.tblCodes.Controls.Add(this.pnlSub4, 4, 0);
-            this.tblCodes.Controls.Add(this.pnlRow2Main, 0, 1);
-            this.tblCodes.Controls.Add(this.pnlRow2Sub1, 1, 1);
-            this.tblCodes.Controls.Add(this.pnlRow2Sub2, 2, 1);
-            this.tblCodes.Controls.Add(this.pnlRow2Sub3, 3, 1);
-            this.tblCodes.Controls.Add(this.pnlRow2Sub4, 4, 1);
+            this.tblCodes.Controls.Add(this.lblSection1, 0, 0);
+            this.tblCodes.Controls.Add(this.pnlMainCode, 0, 1);
+            this.tblCodes.Controls.Add(this.pnlSub1, 1, 1);
+            this.tblCodes.Controls.Add(this.pnlSub2, 2, 1);
+            this.tblCodes.Controls.Add(this.pnlSub3, 3, 1);
+            this.tblCodes.Controls.Add(this.pnlSub4, 4, 1);
+            this.tblCodes.Controls.Add(this.lblSection2, 0, 2);
+            this.tblCodes.Controls.Add(this.pnlRow2Main, 0, 3);
+            this.tblCodes.Controls.Add(this.pnlRow2Sub1, 1, 3);
+            this.tblCodes.Controls.Add(this.pnlRow2Sub2, 2, 3);
+            this.tblCodes.Controls.Add(this.pnlRow2Sub3, 3, 3);
+            this.tblCodes.Controls.Add(this.pnlRow2Sub4, 4, 3);
             this.tblCodes.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tblCodes.Location = new System.Drawing.Point(3, 63);
             this.tblCodes.Name = "tblCodes";
-            this.tblCodes.RowCount = 2;
+            this.tblCodes.RowCount = 4;
+            this.tblCodes.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tblCodes.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tblCodes.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tblCodes.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tblCodes.Size = new System.Drawing.Size(1223, 663);
             this.tblCodes.TabIndex = 1;
+            // 
+            // lblSection1
+            // 
+            this.lblSection1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(114)))), ((int)(((byte)(198)))));
+            this.tblCodes.SetColumnSpan(this.lblSection1, 5);
+            this.lblSection1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblSection1.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lblSection1.ForeColor = System.Drawing.Color.White;
+            this.lblSection1.Location = new System.Drawing.Point(3, 0);
+            this.lblSection1.Name = "lblSection1";
+            this.lblSection1.Size = new System.Drawing.Size(1217, 30);
+            this.lblSection1.TabIndex = 2;
+            this.lblSection1.Text = "压装数据区域";
+            this.lblSection1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // pnlMainCode
             // 
@@ -442,10 +499,10 @@ namespace DataBaseOrm
             this.pnlMainCode.Controls.Add(this.dgvMainCode);
             this.pnlMainCode.Controls.Add(this.lblMainCodeTitle);
             this.pnlMainCode.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlMainCode.Location = new System.Drawing.Point(3, 3);
+            this.pnlMainCode.Location = new System.Drawing.Point(3, 33);
             this.pnlMainCode.Name = "pnlMainCode";
             this.pnlMainCode.Padding = new System.Windows.Forms.Padding(6);
-            this.pnlMainCode.Size = new System.Drawing.Size(238, 325);
+            this.pnlMainCode.Size = new System.Drawing.Size(238, 295);
             this.pnlMainCode.TabIndex = 0;
             // 
             // dgvMainCode
@@ -468,7 +525,7 @@ namespace DataBaseOrm
             this.dgvMainCode.RowHeadersWidth = 51;
             this.dgvMainCode.RowTemplate.DefaultCellStyle.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvMainCode.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvMainCode.Size = new System.Drawing.Size(224, 279);
+            this.dgvMainCode.Size = new System.Drawing.Size(224, 249);
             this.dgvMainCode.TabIndex = 2;
             // 
             // lblMainCodeTitle
@@ -481,7 +538,7 @@ namespace DataBaseOrm
             this.lblMainCodeTitle.Name = "lblMainCodeTitle";
             this.lblMainCodeTitle.Size = new System.Drawing.Size(224, 32);
             this.lblMainCodeTitle.TabIndex = 0;
-            this.lblMainCodeTitle.Text = "主码";
+            this.lblMainCodeTitle.Text = "KSZ码";
             this.lblMainCodeTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // pnlSub1
@@ -491,10 +548,10 @@ namespace DataBaseOrm
             this.pnlSub1.Controls.Add(this.dgvSubCode1);
             this.pnlSub1.Controls.Add(this.lblSub1Title);
             this.pnlSub1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlSub1.Location = new System.Drawing.Point(247, 3);
+            this.pnlSub1.Location = new System.Drawing.Point(247, 33);
             this.pnlSub1.Name = "pnlSub1";
             this.pnlSub1.Padding = new System.Windows.Forms.Padding(6);
-            this.pnlSub1.Size = new System.Drawing.Size(238, 325);
+            this.pnlSub1.Size = new System.Drawing.Size(238, 295);
             this.pnlSub1.TabIndex = 1;
             // 
             // dgvSubCode1
@@ -517,7 +574,7 @@ namespace DataBaseOrm
             this.dgvSubCode1.RowHeadersWidth = 51;
             this.dgvSubCode1.RowTemplate.DefaultCellStyle.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvSubCode1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvSubCode1.Size = new System.Drawing.Size(224, 279);
+            this.dgvSubCode1.Size = new System.Drawing.Size(224, 249);
             this.dgvSubCode1.TabIndex = 2;
             // 
             // lblSub1Title
@@ -529,7 +586,7 @@ namespace DataBaseOrm
             this.lblSub1Title.Name = "lblSub1Title";
             this.lblSub1Title.Size = new System.Drawing.Size(224, 32);
             this.lblSub1Title.TabIndex = 0;
-            this.lblSub1Title.Text = "副码1";
+            this.lblSub1Title.Text = "PSH码1";
             // 
             // pnlSub2
             // 
@@ -538,10 +595,10 @@ namespace DataBaseOrm
             this.pnlSub2.Controls.Add(this.dgvSubCode2);
             this.pnlSub2.Controls.Add(this.lblSub2Title);
             this.pnlSub2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlSub2.Location = new System.Drawing.Point(491, 3);
+            this.pnlSub2.Location = new System.Drawing.Point(491, 33);
             this.pnlSub2.Name = "pnlSub2";
             this.pnlSub2.Padding = new System.Windows.Forms.Padding(6);
-            this.pnlSub2.Size = new System.Drawing.Size(238, 325);
+            this.pnlSub2.Size = new System.Drawing.Size(238, 295);
             this.pnlSub2.TabIndex = 2;
             // 
             // dgvSubCode2
@@ -564,7 +621,7 @@ namespace DataBaseOrm
             this.dgvSubCode2.RowHeadersWidth = 51;
             this.dgvSubCode2.RowTemplate.DefaultCellStyle.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvSubCode2.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvSubCode2.Size = new System.Drawing.Size(224, 279);
+            this.dgvSubCode2.Size = new System.Drawing.Size(224, 249);
             this.dgvSubCode2.TabIndex = 2;
             // 
             // lblSub2Title
@@ -576,7 +633,7 @@ namespace DataBaseOrm
             this.lblSub2Title.Name = "lblSub2Title";
             this.lblSub2Title.Size = new System.Drawing.Size(224, 32);
             this.lblSub2Title.TabIndex = 0;
-            this.lblSub2Title.Text = "副码2";
+            this.lblSub2Title.Text = "PSH码2";
             // 
             // pnlSub3
             // 
@@ -585,10 +642,10 @@ namespace DataBaseOrm
             this.pnlSub3.Controls.Add(this.dgvSubCode3);
             this.pnlSub3.Controls.Add(this.lblSub3Title);
             this.pnlSub3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlSub3.Location = new System.Drawing.Point(735, 3);
+            this.pnlSub3.Location = new System.Drawing.Point(735, 33);
             this.pnlSub3.Name = "pnlSub3";
             this.pnlSub3.Padding = new System.Windows.Forms.Padding(6);
-            this.pnlSub3.Size = new System.Drawing.Size(238, 325);
+            this.pnlSub3.Size = new System.Drawing.Size(238, 295);
             this.pnlSub3.TabIndex = 3;
             // 
             // dgvSubCode3
@@ -611,7 +668,7 @@ namespace DataBaseOrm
             this.dgvSubCode3.RowHeadersWidth = 51;
             this.dgvSubCode3.RowTemplate.DefaultCellStyle.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvSubCode3.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvSubCode3.Size = new System.Drawing.Size(224, 279);
+            this.dgvSubCode3.Size = new System.Drawing.Size(224, 249);
             this.dgvSubCode3.TabIndex = 2;
             // 
             // lblSub3Title
@@ -623,7 +680,7 @@ namespace DataBaseOrm
             this.lblSub3Title.Name = "lblSub3Title";
             this.lblSub3Title.Size = new System.Drawing.Size(224, 32);
             this.lblSub3Title.TabIndex = 0;
-            this.lblSub3Title.Text = "副码3";
+            this.lblSub3Title.Text = "PSH码3";
             // 
             // pnlSub4
             // 
@@ -632,10 +689,10 @@ namespace DataBaseOrm
             this.pnlSub4.Controls.Add(this.dgvSubCode4);
             this.pnlSub4.Controls.Add(this.lblSub4Title);
             this.pnlSub4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlSub4.Location = new System.Drawing.Point(979, 3);
+            this.pnlSub4.Location = new System.Drawing.Point(979, 33);
             this.pnlSub4.Name = "pnlSub4";
             this.pnlSub4.Padding = new System.Windows.Forms.Padding(6);
-            this.pnlSub4.Size = new System.Drawing.Size(241, 325);
+            this.pnlSub4.Size = new System.Drawing.Size(241, 295);
             this.pnlSub4.TabIndex = 4;
             // 
             // dgvSubCode4
@@ -658,7 +715,7 @@ namespace DataBaseOrm
             this.dgvSubCode4.RowHeadersWidth = 51;
             this.dgvSubCode4.RowTemplate.DefaultCellStyle.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvSubCode4.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvSubCode4.Size = new System.Drawing.Size(227, 279);
+            this.dgvSubCode4.Size = new System.Drawing.Size(227, 249);
             this.dgvSubCode4.TabIndex = 2;
             // 
             // lblSub4Title
@@ -670,7 +727,21 @@ namespace DataBaseOrm
             this.lblSub4Title.Name = "lblSub4Title";
             this.lblSub4Title.Size = new System.Drawing.Size(227, 32);
             this.lblSub4Title.TabIndex = 0;
-            this.lblSub4Title.Text = "副码4";
+            this.lblSub4Title.Text = "PSH码4";
+            // 
+            // lblSection2
+            // 
+            this.lblSection2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(80)))), ((int)(((byte)(0)))));
+            this.tblCodes.SetColumnSpan(this.lblSection2, 5);
+            this.lblSection2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblSection2.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lblSection2.ForeColor = System.Drawing.Color.White;
+            this.lblSection2.Location = new System.Drawing.Point(3, 331);
+            this.lblSection2.Name = "lblSection2";
+            this.lblSection2.Size = new System.Drawing.Size(1217, 30);
+            this.lblSection2.TabIndex = 3;
+            this.lblSection2.Text = "推卡夹数据区域";
+            this.lblSection2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // pnlRow2Main
             // 
@@ -679,10 +750,10 @@ namespace DataBaseOrm
             this.pnlRow2Main.Controls.Add(this.dgvRow2Main);
             this.pnlRow2Main.Controls.Add(this.lblRow2MainTitle);
             this.pnlRow2Main.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlRow2Main.Location = new System.Drawing.Point(3, 334);
+            this.pnlRow2Main.Location = new System.Drawing.Point(3, 364);
             this.pnlRow2Main.Name = "pnlRow2Main";
             this.pnlRow2Main.Padding = new System.Windows.Forms.Padding(8);
-            this.pnlRow2Main.Size = new System.Drawing.Size(238, 326);
+            this.pnlRow2Main.Size = new System.Drawing.Size(238, 296);
             this.pnlRow2Main.TabIndex = 5;
             // 
             // dgvRow2Main
@@ -705,7 +776,7 @@ namespace DataBaseOrm
             this.dgvRow2Main.RowHeadersWidth = 51;
             this.dgvRow2Main.RowTemplate.DefaultCellStyle.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvRow2Main.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvRow2Main.Size = new System.Drawing.Size(220, 268);
+            this.dgvRow2Main.Size = new System.Drawing.Size(220, 238);
             this.dgvRow2Main.TabIndex = 1;
             this.dgvRow2Main.Tag = "推卡夹";
             // 
@@ -719,7 +790,7 @@ namespace DataBaseOrm
             this.lblRow2MainTitle.Name = "lblRow2MainTitle";
             this.lblRow2MainTitle.Size = new System.Drawing.Size(220, 40);
             this.lblRow2MainTitle.TabIndex = 0;
-            this.lblRow2MainTitle.Text = "主码";
+            this.lblRow2MainTitle.Text = "KSZ码";
             this.lblRow2MainTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // pnlRow2Sub1
@@ -729,10 +800,10 @@ namespace DataBaseOrm
             this.pnlRow2Sub1.Controls.Add(this.dgvRow2Sub1);
             this.pnlRow2Sub1.Controls.Add(this.lblRow2Sub1Title);
             this.pnlRow2Sub1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlRow2Sub1.Location = new System.Drawing.Point(247, 334);
+            this.pnlRow2Sub1.Location = new System.Drawing.Point(247, 364);
             this.pnlRow2Sub1.Name = "pnlRow2Sub1";
             this.pnlRow2Sub1.Padding = new System.Windows.Forms.Padding(8);
-            this.pnlRow2Sub1.Size = new System.Drawing.Size(238, 326);
+            this.pnlRow2Sub1.Size = new System.Drawing.Size(238, 296);
             this.pnlRow2Sub1.TabIndex = 6;
             // 
             // dgvRow2Sub1
@@ -755,7 +826,7 @@ namespace DataBaseOrm
             this.dgvRow2Sub1.RowHeadersWidth = 51;
             this.dgvRow2Sub1.RowTemplate.DefaultCellStyle.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvRow2Sub1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvRow2Sub1.Size = new System.Drawing.Size(220, 267);
+            this.dgvRow2Sub1.Size = new System.Drawing.Size(220, 237);
             this.dgvRow2Sub1.TabIndex = 1;
             this.dgvRow2Sub1.Tag = "推卡夹";
             // 
@@ -768,7 +839,7 @@ namespace DataBaseOrm
             this.lblRow2Sub1Title.Name = "lblRow2Sub1Title";
             this.lblRow2Sub1Title.Size = new System.Drawing.Size(220, 41);
             this.lblRow2Sub1Title.TabIndex = 0;
-            this.lblRow2Sub1Title.Text = "副码1";
+            this.lblRow2Sub1Title.Text = "FSH码1";
             this.lblRow2Sub1Title.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // pnlRow2Sub2
@@ -778,10 +849,10 @@ namespace DataBaseOrm
             this.pnlRow2Sub2.Controls.Add(this.dgvRow2Sub2);
             this.pnlRow2Sub2.Controls.Add(this.lblRow2Sub2Title);
             this.pnlRow2Sub2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlRow2Sub2.Location = new System.Drawing.Point(491, 334);
+            this.pnlRow2Sub2.Location = new System.Drawing.Point(491, 364);
             this.pnlRow2Sub2.Name = "pnlRow2Sub2";
             this.pnlRow2Sub2.Padding = new System.Windows.Forms.Padding(8);
-            this.pnlRow2Sub2.Size = new System.Drawing.Size(238, 326);
+            this.pnlRow2Sub2.Size = new System.Drawing.Size(238, 296);
             this.pnlRow2Sub2.TabIndex = 7;
             // 
             // dgvRow2Sub2
@@ -804,7 +875,7 @@ namespace DataBaseOrm
             this.dgvRow2Sub2.RowHeadersWidth = 51;
             this.dgvRow2Sub2.RowTemplate.DefaultCellStyle.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvRow2Sub2.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvRow2Sub2.Size = new System.Drawing.Size(220, 267);
+            this.dgvRow2Sub2.Size = new System.Drawing.Size(220, 237);
             this.dgvRow2Sub2.TabIndex = 1;
             this.dgvRow2Sub2.Tag = "推卡夹";
             // 
@@ -817,7 +888,7 @@ namespace DataBaseOrm
             this.lblRow2Sub2Title.Name = "lblRow2Sub2Title";
             this.lblRow2Sub2Title.Size = new System.Drawing.Size(220, 41);
             this.lblRow2Sub2Title.TabIndex = 0;
-            this.lblRow2Sub2Title.Text = "副码2";
+            this.lblRow2Sub2Title.Text = "FSH码2";
             this.lblRow2Sub2Title.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // pnlRow2Sub3
@@ -827,10 +898,10 @@ namespace DataBaseOrm
             this.pnlRow2Sub3.Controls.Add(this.dgvRow2Sub3);
             this.pnlRow2Sub3.Controls.Add(this.lblRow2Sub3Title);
             this.pnlRow2Sub3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlRow2Sub3.Location = new System.Drawing.Point(735, 334);
+            this.pnlRow2Sub3.Location = new System.Drawing.Point(735, 364);
             this.pnlRow2Sub3.Name = "pnlRow2Sub3";
             this.pnlRow2Sub3.Padding = new System.Windows.Forms.Padding(8);
-            this.pnlRow2Sub3.Size = new System.Drawing.Size(238, 326);
+            this.pnlRow2Sub3.Size = new System.Drawing.Size(238, 296);
             this.pnlRow2Sub3.TabIndex = 8;
             // 
             // dgvRow2Sub3
@@ -853,7 +924,7 @@ namespace DataBaseOrm
             this.dgvRow2Sub3.RowHeadersWidth = 51;
             this.dgvRow2Sub3.RowTemplate.DefaultCellStyle.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvRow2Sub3.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvRow2Sub3.Size = new System.Drawing.Size(220, 267);
+            this.dgvRow2Sub3.Size = new System.Drawing.Size(220, 237);
             this.dgvRow2Sub3.TabIndex = 1;
             this.dgvRow2Sub3.Tag = "推卡夹";
             // 
@@ -866,7 +937,7 @@ namespace DataBaseOrm
             this.lblRow2Sub3Title.Name = "lblRow2Sub3Title";
             this.lblRow2Sub3Title.Size = new System.Drawing.Size(220, 41);
             this.lblRow2Sub3Title.TabIndex = 0;
-            this.lblRow2Sub3Title.Text = "副码3";
+            this.lblRow2Sub3Title.Text = "FSH码3";
             this.lblRow2Sub3Title.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // pnlRow2Sub4
@@ -876,10 +947,10 @@ namespace DataBaseOrm
             this.pnlRow2Sub4.Controls.Add(this.dgvRow2Sub4);
             this.pnlRow2Sub4.Controls.Add(this.lblRow2Sub4Title);
             this.pnlRow2Sub4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlRow2Sub4.Location = new System.Drawing.Point(979, 334);
+            this.pnlRow2Sub4.Location = new System.Drawing.Point(979, 364);
             this.pnlRow2Sub4.Name = "pnlRow2Sub4";
             this.pnlRow2Sub4.Padding = new System.Windows.Forms.Padding(8);
-            this.pnlRow2Sub4.Size = new System.Drawing.Size(241, 326);
+            this.pnlRow2Sub4.Size = new System.Drawing.Size(241, 296);
             this.pnlRow2Sub4.TabIndex = 9;
             // 
             // dgvRow2Sub4
@@ -902,7 +973,7 @@ namespace DataBaseOrm
             this.dgvRow2Sub4.RowHeadersWidth = 51;
             this.dgvRow2Sub4.RowTemplate.DefaultCellStyle.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvRow2Sub4.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvRow2Sub4.Size = new System.Drawing.Size(223, 267);
+            this.dgvRow2Sub4.Size = new System.Drawing.Size(223, 237);
             this.dgvRow2Sub4.TabIndex = 1;
             this.dgvRow2Sub4.Tag = "推卡夹";
             // 
@@ -915,7 +986,7 @@ namespace DataBaseOrm
             this.lblRow2Sub4Title.Name = "lblRow2Sub4Title";
             this.lblRow2Sub4Title.Size = new System.Drawing.Size(223, 41);
             this.lblRow2Sub4Title.TabIndex = 0;
-            this.lblRow2Sub4Title.Text = "副码4";
+            this.lblRow2Sub4Title.Text = "FSH码4";
             this.lblRow2Sub4Title.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // pnlSummary
@@ -966,9 +1037,9 @@ namespace DataBaseOrm
             this.lblProduct1SubSummary.Location = new System.Drawing.Point(6, 37);
             this.lblProduct1SubSummary.Name = "lblProduct1SubSummary";
             this.lblProduct1SubSummary.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
-            this.lblProduct1SubSummary.Size = new System.Drawing.Size(175, 23);
+            this.lblProduct1SubSummary.Size = new System.Drawing.Size(190, 23);
             this.lblProduct1SubSummary.TabIndex = 1;
-            this.lblProduct1SubSummary.Text = "副码：等待PLC数据...";
+            this.lblProduct1SubSummary.Text = "FSH码：等待PLC数据...";
             this.lblProduct1SubSummary.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lblProduct1Status
@@ -1006,9 +1077,9 @@ namespace DataBaseOrm
             this.lblProduct2SubSummary.Location = new System.Drawing.Point(6, 37);
             this.lblProduct2SubSummary.Name = "lblProduct2SubSummary";
             this.lblProduct2SubSummary.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
-            this.lblProduct2SubSummary.Size = new System.Drawing.Size(175, 23);
+            this.lblProduct2SubSummary.Size = new System.Drawing.Size(190, 23);
             this.lblProduct2SubSummary.TabIndex = 1;
-            this.lblProduct2SubSummary.Text = "副码：等待PLC数据...";
+            this.lblProduct2SubSummary.Text = "FSH码：等待PLC数据...";
             this.lblProduct2SubSummary.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lblProduct2Status
@@ -1048,7 +1119,7 @@ namespace DataBaseOrm
             this.tblResults.Controls.Add(this.lblNgTitle, 0, 2);
             this.tblResults.Controls.Add(this.dgvNgResult, 0, 3);
             this.tblResults.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tblResults.Location = new System.Drawing.Point(3, 210);
+            this.tblResults.Location = new System.Drawing.Point(3, 282);
             this.tblResults.Name = "tblResults";
             this.tblResults.Padding = new System.Windows.Forms.Padding(6, 0, 6, 6);
             this.tblResults.RowCount = 4;
@@ -1056,7 +1127,7 @@ namespace DataBaseOrm
             this.tblResults.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tblResults.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 36F));
             this.tblResults.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tblResults.Size = new System.Drawing.Size(1229, 619);
+            this.tblResults.Size = new System.Drawing.Size(1229, 547);
             this.tblResults.TabIndex = 1;
             // 
             // lblOkTitle
@@ -1090,7 +1161,7 @@ namespace DataBaseOrm
             this.dgvOkResult.RowHeadersWidth = 51;
             this.dgvOkResult.RowTemplate.Height = 27;
             this.dgvOkResult.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvOkResult.Size = new System.Drawing.Size(1205, 270);
+            this.dgvOkResult.Size = new System.Drawing.Size(1205, 234);
             this.dgvOkResult.TabIndex = 1;
             // 
             // lblNgTitle
@@ -1099,7 +1170,7 @@ namespace DataBaseOrm
             this.lblNgTitle.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblNgTitle.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.lblNgTitle.ForeColor = System.Drawing.Color.White;
-            this.lblNgTitle.Location = new System.Drawing.Point(12, 306);
+            this.lblNgTitle.Location = new System.Drawing.Point(12, 270);
             this.lblNgTitle.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.lblNgTitle.Name = "lblNgTitle";
             this.lblNgTitle.Size = new System.Drawing.Size(1205, 36);
@@ -1116,7 +1187,7 @@ namespace DataBaseOrm
             this.dgvNgResult.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgvNgResult.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvNgResult.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvNgResult.Location = new System.Drawing.Point(12, 342);
+            this.dgvNgResult.Location = new System.Drawing.Point(12, 306);
             this.dgvNgResult.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.dgvNgResult.Name = "dgvNgResult";
             this.dgvNgResult.ReadOnly = true;
@@ -1124,11 +1195,13 @@ namespace DataBaseOrm
             this.dgvNgResult.RowHeadersWidth = 51;
             this.dgvNgResult.RowTemplate.Height = 27;
             this.dgvNgResult.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvNgResult.Size = new System.Drawing.Size(1205, 271);
+            this.dgvNgResult.Size = new System.Drawing.Size(1205, 235);
             this.dgvNgResult.TabIndex = 1;
             // 
             // pnlQueryTop
             // 
+            this.pnlQueryTop.Controls.Add(this.button1);
+            this.pnlQueryTop.Controls.Add(this.label2);
             this.pnlQueryTop.Controls.Add(this.lblQueryTitle);
             this.pnlQueryTop.Controls.Add(this.btnQueryNg);
             this.pnlQueryTop.Controls.Add(this.btnQueryOk);
@@ -1139,6 +1212,7 @@ namespace DataBaseOrm
             this.pnlQueryTop.Controls.Add(this.dtpExportFrom);
             this.pnlQueryTop.Controls.Add(this.lblExportTo);
             this.pnlQueryTop.Controls.Add(this.dtpExportTo);
+            this.pnlQueryTop.Controls.Add(this.lblQueryHelp);
             this.pnlQueryTop.Controls.Add(this.cmbExportTable);
             this.pnlQueryTop.Controls.Add(this.btnExportCsv);
             this.pnlQueryTop.Controls.Add(this.label1);
@@ -1147,15 +1221,41 @@ namespace DataBaseOrm
             this.pnlQueryTop.Location = new System.Drawing.Point(3, 2);
             this.pnlQueryTop.Name = "pnlQueryTop";
             this.pnlQueryTop.Padding = new System.Windows.Forms.Padding(20, 12, 20, 12);
-            this.pnlQueryTop.Size = new System.Drawing.Size(1229, 208);
+            this.pnlQueryTop.Size = new System.Drawing.Size(1229, 280);
             this.pnlQueryTop.TabIndex = 0;
+            // 
+            // button1
+            // 
+            this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(114)))), ((int)(((byte)(198)))));
+            this.button1.FlatAppearance.BorderSize = 0;
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button1.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button1.ForeColor = System.Drawing.Color.White;
+            this.button1.Location = new System.Drawing.Point(702, 164);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(149, 42);
+            this.button1.TabIndex = 12;
+            this.button1.Text = "🔍 日期查询";
+            this.button1.UseVisualStyleBackColor = false;
+            this.button1.Click += new System.EventHandler(this.btnDateQuery_Click);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("微软雅黑", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(55)))), ((int)(((byte)(90)))));
+            this.label2.Location = new System.Drawing.Point(11, 112);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(123, 36);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "日期查询";
             // 
             // lblQueryTitle
             // 
             this.lblQueryTitle.AutoSize = true;
             this.lblQueryTitle.Font = new System.Drawing.Font("微软雅黑", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.lblQueryTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(55)))), ((int)(((byte)(90)))));
-            this.lblQueryTitle.Location = new System.Drawing.Point(20, 14);
+            this.lblQueryTitle.Location = new System.Drawing.Point(11, 12);
             this.lblQueryTitle.Name = "lblQueryTitle";
             this.lblQueryTitle.Size = new System.Drawing.Size(123, 36);
             this.lblQueryTitle.TabIndex = 0;
@@ -1168,11 +1268,11 @@ namespace DataBaseOrm
             this.btnQueryNg.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnQueryNg.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.btnQueryNg.ForeColor = System.Drawing.Color.White;
-            this.btnQueryNg.Location = new System.Drawing.Point(860, 16);
+            this.btnQueryNg.Location = new System.Drawing.Point(871, 55);
             this.btnQueryNg.Name = "btnQueryNg";
-            this.btnQueryNg.Size = new System.Drawing.Size(120, 42);
+            this.btnQueryNg.Size = new System.Drawing.Size(149, 42);
             this.btnQueryNg.TabIndex = 3;
-            this.btnQueryNg.Text = "🔍 NG查询";
+            this.btnQueryNg.Text = "🔍 全库查询";
             this.btnQueryNg.UseVisualStyleBackColor = false;
             this.btnQueryNg.Click += new System.EventHandler(this.btnQueryNg_Click);
             // 
@@ -1183,11 +1283,11 @@ namespace DataBaseOrm
             this.btnQueryOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnQueryOk.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.btnQueryOk.ForeColor = System.Drawing.Color.White;
-            this.btnQueryOk.Location = new System.Drawing.Point(730, 16);
+            this.btnQueryOk.Location = new System.Drawing.Point(702, 55);
             this.btnQueryOk.Name = "btnQueryOk";
-            this.btnQueryOk.Size = new System.Drawing.Size(120, 42);
+            this.btnQueryOk.Size = new System.Drawing.Size(149, 42);
             this.btnQueryOk.TabIndex = 2;
-            this.btnQueryOk.Text = "🔍 OK查询";
+            this.btnQueryOk.Text = "🔍 单表查询";
             this.btnQueryOk.UseVisualStyleBackColor = false;
             this.btnQueryOk.Click += new System.EventHandler(this.btnQueryOk_Click);
             // 
@@ -1196,9 +1296,9 @@ namespace DataBaseOrm
             this.cmbQueryProduct.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbQueryProduct.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.cmbQueryProduct.FormattingEnabled = true;
-            this.cmbQueryProduct.Location = new System.Drawing.Point(575, 18);
+            this.cmbQueryProduct.Location = new System.Drawing.Point(463, 60);
             this.cmbQueryProduct.Name = "cmbQueryProduct";
-            this.cmbQueryProduct.Size = new System.Drawing.Size(140, 35);
+            this.cmbQueryProduct.Size = new System.Drawing.Size(201, 35);
             this.cmbQueryProduct.TabIndex = 5;
             // 
             // lblQueryProduct
@@ -1206,16 +1306,16 @@ namespace DataBaseOrm
             this.lblQueryProduct.AutoSize = true;
             this.lblQueryProduct.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.lblQueryProduct.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
-            this.lblQueryProduct.Location = new System.Drawing.Point(500, 22);
+            this.lblQueryProduct.Location = new System.Drawing.Point(388, 64);
             this.lblQueryProduct.Name = "lblQueryProduct";
             this.lblQueryProduct.Size = new System.Drawing.Size(72, 27);
             this.lblQueryProduct.TabIndex = 4;
-            this.lblQueryProduct.Text = "产品：";
+            this.lblQueryProduct.Text = "表名：";
             // 
             // txtQueryCode
             // 
             this.txtQueryCode.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.txtQueryCode.Location = new System.Drawing.Point(230, 18);
+            this.txtQueryCode.Location = new System.Drawing.Point(118, 60);
             this.txtQueryCode.Name = "txtQueryCode";
             this.txtQueryCode.Size = new System.Drawing.Size(260, 34);
             this.txtQueryCode.TabIndex = 1;
@@ -1225,27 +1325,27 @@ namespace DataBaseOrm
             this.lblQueryInput.AutoSize = true;
             this.lblQueryInput.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.lblQueryInput.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
-            this.lblQueryInput.Location = new System.Drawing.Point(150, 22);
+            this.lblQueryInput.Location = new System.Drawing.Point(23, 63);
             this.lblQueryInput.Name = "lblQueryInput";
-            this.lblQueryInput.Size = new System.Drawing.Size(72, 27);
+            this.lblQueryInput.Size = new System.Drawing.Size(89, 27);
             this.lblQueryInput.TabIndex = 0;
-            this.lblQueryInput.Text = "主码：";
+            this.lblQueryInput.Text = "KSZ码：";
             // 
             // dtpExportFrom
             // 
             this.dtpExportFrom.CustomFormat = "yyyy-MM-dd";
             this.dtpExportFrom.Font = new System.Drawing.Font("微软雅黑", 11F);
             this.dtpExportFrom.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dtpExportFrom.Location = new System.Drawing.Point(230, 95);
+            this.dtpExportFrom.Location = new System.Drawing.Point(118, 169);
             this.dtpExportFrom.Name = "dtpExportFrom";
-            this.dtpExportFrom.Size = new System.Drawing.Size(201, 32);
+            this.dtpExportFrom.Size = new System.Drawing.Size(232, 32);
             this.dtpExportFrom.TabIndex = 7;
             // 
             // lblExportTo
             // 
             this.lblExportTo.AutoSize = true;
             this.lblExportTo.Font = new System.Drawing.Font("微软雅黑", 12F);
-            this.lblExportTo.Location = new System.Drawing.Point(449, 99);
+            this.lblExportTo.Location = new System.Drawing.Point(374, 169);
             this.lblExportTo.Name = "lblExportTo";
             this.lblExportTo.Size = new System.Drawing.Size(32, 27);
             this.lblExportTo.TabIndex = 8;
@@ -1256,17 +1356,28 @@ namespace DataBaseOrm
             this.dtpExportTo.CustomFormat = "yyyy-MM-dd";
             this.dtpExportTo.Font = new System.Drawing.Font("微软雅黑", 11F);
             this.dtpExportTo.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dtpExportTo.Location = new System.Drawing.Point(487, 95);
+            this.dtpExportTo.Location = new System.Drawing.Point(431, 166);
             this.dtpExportTo.Name = "dtpExportTo";
             this.dtpExportTo.Size = new System.Drawing.Size(210, 32);
             this.dtpExportTo.TabIndex = 9;
+            // 
+            // lblQueryHelp
+            // 
+            this.lblQueryHelp.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.lblQueryHelp.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lblQueryHelp.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(100)))), ((int)(((byte)(100)))));
+            this.lblQueryHelp.Location = new System.Drawing.Point(20, 250);
+            this.lblQueryHelp.Name = "lblQueryHelp";
+            this.lblQueryHelp.Size = new System.Drawing.Size(1189, 18);
+            this.lblQueryHelp.TabIndex = 20;
+            this.lblQueryHelp.Text = "💡 输入KSZ码 → 选择表 →【单表查询】查指定表 /【全库查询】搜所有表 | 日期查询：选表+日期 →【日期查询】";
             // 
             // cmbExportTable
             // 
             this.cmbExportTable.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbExportTable.Font = new System.Drawing.Font("微软雅黑", 11F);
             this.cmbExportTable.FormattingEnabled = true;
-            this.cmbExportTable.Location = new System.Drawing.Point(230, 140);
+            this.cmbExportTable.Location = new System.Drawing.Point(118, 214);
             this.cmbExportTable.Name = "cmbExportTable";
             this.cmbExportTable.Size = new System.Drawing.Size(201, 32);
             this.cmbExportTable.TabIndex = 10;
@@ -1278,19 +1389,20 @@ namespace DataBaseOrm
             this.btnExportCsv.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnExportCsv.Font = new System.Drawing.Font("微软雅黑", 11F, System.Drawing.FontStyle.Bold);
             this.btnExportCsv.ForeColor = System.Drawing.Color.White;
-            this.btnExportCsv.Location = new System.Drawing.Point(730, 92);
+            this.btnExportCsv.Location = new System.Drawing.Point(871, 163);
             this.btnExportCsv.Name = "btnExportCsv";
-            this.btnExportCsv.Size = new System.Drawing.Size(250, 42);
+            this.btnExportCsv.Size = new System.Drawing.Size(149, 42);
             this.btnExportCsv.TabIndex = 11;
             this.btnExportCsv.Text = "📥 导出CSV";
             this.btnExportCsv.UseVisualStyleBackColor = false;
+            this.btnExportCsv.Click += new System.EventHandler(this.BtnExportCsv_Click);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("微软雅黑", 12F);
             this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
-            this.label1.Location = new System.Drawing.Point(150, 140);
+            this.label1.Location = new System.Drawing.Point(38, 214);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(72, 27);
             this.label1.TabIndex = 6;
@@ -1301,7 +1413,7 @@ namespace DataBaseOrm
             this.lblExportFrom.AutoSize = true;
             this.lblExportFrom.Font = new System.Drawing.Font("微软雅黑", 12F);
             this.lblExportFrom.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
-            this.lblExportFrom.Location = new System.Drawing.Point(150, 95);
+            this.lblExportFrom.Location = new System.Drawing.Point(38, 169);
             this.lblExportFrom.Name = "lblExportFrom";
             this.lblExportFrom.Size = new System.Drawing.Size(72, 27);
             this.lblExportFrom.TabIndex = 6;
@@ -1484,11 +1596,11 @@ namespace DataBaseOrm
             this.lstGroupSelector.FormattingEnabled = true;
             this.lstGroupSelector.ItemHeight = 27;
             this.lstGroupSelector.Items.AddRange(new object[] {
-            "主码",
-            "副码1",
-            "副码2",
-            "副码3",
-            "副码4"});
+            "KSZ码",
+            "FSH码1",
+            "FSH码2",
+            "FSH码3",
+            "FSH码4"});
             this.lstGroupSelector.Location = new System.Drawing.Point(20, 40);
             this.lstGroupSelector.Name = "lstGroupSelector";
             this.lstGroupSelector.Size = new System.Drawing.Size(180, 353);
@@ -2529,14 +2641,13 @@ namespace DataBaseOrm
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.Panel pnlQueryTop;
+        private System.Windows.Forms.Label lblQueryHelp;
         private System.Windows.Forms.Label lblQueryTitle;
         private System.Windows.Forms.Button btnQueryOk;
         private System.Windows.Forms.Button btnQueryNg;
-        private System.Windows.Forms.ComboBox cmbQueryProduct;
         private System.Windows.Forms.Label lblQueryProduct;
         private System.Windows.Forms.DateTimePicker dtpExportFrom;
         private System.Windows.Forms.DateTimePicker dtpExportTo;
-        private System.Windows.Forms.ComboBox cmbExportTable;
         private System.Windows.Forms.Button btnExportCsv;
         private System.Windows.Forms.Label lblExportFrom;
         private System.Windows.Forms.Label lblExportTo;
@@ -2597,6 +2708,8 @@ namespace DataBaseOrm
         private System.Windows.Forms.Panel pnlRow2Sub4;
         private System.Windows.Forms.Label lblRow2Sub4Title;
         private System.Windows.Forms.DataGridView dgvRow2Sub4;
+        private System.Windows.Forms.Label lblSection1;
+        private System.Windows.Forms.Label lblSection2;
         private System.Windows.Forms.Panel pnlSummary;
         private System.Windows.Forms.Label lblMainStatusValue;
         private System.Windows.Forms.Label lblSubSummaryValue;
@@ -2643,6 +2756,7 @@ namespace DataBaseOrm
         private System.Windows.Forms.TabPage tabPage6;
         private System.Windows.Forms.Panel pnlPlcTop;
         private System.Windows.Forms.Label lblPlcHeartbeat;
+        private System.Windows.Forms.Button btnPermission;
         private System.Windows.Forms.Button btnToggleLog;
         private System.Windows.Forms.TableLayoutPanel tlpDbBottom;
         private System.Windows.Forms.Panel pnlDbButtons;
@@ -2687,5 +2801,10 @@ namespace DataBaseOrm
         private System.Windows.Forms.TableLayoutPanel tlpDbPage;
         private System.Windows.Forms.TableLayoutPanel tlpDbInputs;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox cmbQueryProduct;
+        private System.Windows.Forms.ComboBox cmbExportTable;
+        private System.Windows.Forms.Button btnChangePwd;
     }
 }

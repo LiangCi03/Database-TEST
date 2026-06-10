@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -163,10 +163,10 @@ namespace DataBaseOrm
             // === 主码（String[50] at DB18.8） + 状态标志 ===
             config.Groups.Add(new CodeGroupConfig
             {
-                GroupName = "主码",
+                GroupName = "KSZ码",
                 Columns = new List<BarcodeColumnConfig>
                 {
-                    new BarcodeColumnConfig { DisplayName = "主码内容", Address = "DB18.8", DataType = "STRING", DbColumnName = "主码" },
+                    new BarcodeColumnConfig { DisplayName = "KSZ码内容", Address = "DB18.8", DataType = "STRING", DbColumnName = "KSZ码" },
                     new BarcodeColumnConfig { DisplayName = "当前是否有码", Address = "DB18.268", DataType = "INT16", DbColumnName = "当前是否有码" },
                     new BarcodeColumnConfig { DisplayName = "是否有卡夹", Address = "DB18.270", DataType = "INT16", DbColumnName = "是否有卡夹" },
                     new BarcodeColumnConfig { DisplayName = "是否是返工件", Address = "DB18.272", DataType = "INT16", DbColumnName = "是否是返工件" },
@@ -179,60 +179,60 @@ namespace DataBaseOrm
             // === 副码1（String[50] at DB18.60） ===
             config.Groups.Add(new CodeGroupConfig
             {
-                GroupName = "副码1",
+                GroupName = "FSH码1",
                 Columns = new List<BarcodeColumnConfig>
                 {
-                    new BarcodeColumnConfig { DisplayName = "副码1内容", Address = "DB18.60", DataType = "STRING", DbColumnName = "副码1" },
-                    new BarcodeColumnConfig { DisplayName = "装加热塞位移", Address = "DB18.274", DataType = "REAL", DbColumnName = "副码1装加热塞位移" },
-                    new BarcodeColumnConfig { DisplayName = "装加热塞力", Address = "DB18.278", DataType = "REAL", DbColumnName = "副码1装加热塞力" },
-                    new BarcodeColumnConfig { DisplayName = "最大力位移", Address = "DB18.282", DataType = "REAL", DbColumnName = "副码1最大力位移" },
-                    new BarcodeColumnConfig { DisplayName = "最大力", Address = "DB18.286", DataType = "REAL", DbColumnName = "副码1最大力" },
-                    new BarcodeColumnConfig { DisplayName = "结果", Address = "DB18.340", DataType = "INT16", DbColumnName = "副码1结果" },
+                    new BarcodeColumnConfig { DisplayName = "FSH码1内容", Address = "DB18.60", DataType = "STRING", DbColumnName = "FSH码1" },
+                    new BarcodeColumnConfig { DisplayName = "装加热塞位移", Address = "DB18.274", DataType = "REAL", DbColumnName = "FSH码1装加热塞位移" },
+                    new BarcodeColumnConfig { DisplayName = "装加热塞力", Address = "DB18.278", DataType = "REAL", DbColumnName = "FSH码1装加热塞力" },
+                    new BarcodeColumnConfig { DisplayName = "最大力位移", Address = "DB18.282", DataType = "REAL", DbColumnName = "FSH码1最大力位移" },
+                    new BarcodeColumnConfig { DisplayName = "最大力", Address = "DB18.286", DataType = "REAL", DbColumnName = "FSH码1最大力" },
+                    new BarcodeColumnConfig { DisplayName = "结果", Address = "DB18.340", DataType = "INT16", DbColumnName = "FSH码1结果" },
                 }
             });
 
             // === 副码2（String[50] at DB18.112） ===
             config.Groups.Add(new CodeGroupConfig
             {
-                GroupName = "副码2",
+                GroupName = "FSH码2",
                 Columns = new List<BarcodeColumnConfig>
                 {
-                    new BarcodeColumnConfig { DisplayName = "副码2内容", Address = "DB18.112", DataType = "STRING", DbColumnName = "副码2" },
-                    new BarcodeColumnConfig { DisplayName = "装加热塞位移", Address = "DB18.290", DataType = "REAL", DbColumnName = "副码2装加热塞位移" },
-                    new BarcodeColumnConfig { DisplayName = "装加热塞力", Address = "DB18.294", DataType = "REAL", DbColumnName = "副码2装加热塞力" },
-                    new BarcodeColumnConfig { DisplayName = "最大力位移", Address = "DB18.298", DataType = "REAL", DbColumnName = "副码2最大力位移" },
-                    new BarcodeColumnConfig { DisplayName = "最大力", Address = "DB18.302", DataType = "REAL", DbColumnName = "副码2最大力" },
-                    new BarcodeColumnConfig { DisplayName = "结果", Address = "DB18.342", DataType = "INT16", DbColumnName = "副码2结果" },
+                    new BarcodeColumnConfig { DisplayName = "FSH码2内容", Address = "DB18.112", DataType = "STRING", DbColumnName = "FSH码2" },
+                    new BarcodeColumnConfig { DisplayName = "装加热塞位移", Address = "DB18.290", DataType = "REAL", DbColumnName = "FSH码2装加热塞位移" },
+                    new BarcodeColumnConfig { DisplayName = "装加热塞力", Address = "DB18.294", DataType = "REAL", DbColumnName = "FSH码2装加热塞力" },
+                    new BarcodeColumnConfig { DisplayName = "最大力位移", Address = "DB18.298", DataType = "REAL", DbColumnName = "FSH码2最大力位移" },
+                    new BarcodeColumnConfig { DisplayName = "最大力", Address = "DB18.302", DataType = "REAL", DbColumnName = "FSH码2最大力" },
+                    new BarcodeColumnConfig { DisplayName = "结果", Address = "DB18.342", DataType = "INT16", DbColumnName = "FSH码2结果" },
                 }
             });
 
             // === 副码3（String[50] at DB18.164） ===
             config.Groups.Add(new CodeGroupConfig
             {
-                GroupName = "副码3",
+                GroupName = "FSH码3",
                 Columns = new List<BarcodeColumnConfig>
                 {
-                    new BarcodeColumnConfig { DisplayName = "副码3内容", Address = "DB18.164", DataType = "STRING", DbColumnName = "副码3" },
-                    new BarcodeColumnConfig { DisplayName = "装加热塞位移", Address = "DB18.306", DataType = "REAL", DbColumnName = "副码3装加热塞位移" },
-                    new BarcodeColumnConfig { DisplayName = "装加热塞力", Address = "DB18.310", DataType = "REAL", DbColumnName = "副码3装加热塞力" },
-                    new BarcodeColumnConfig { DisplayName = "最大力位移", Address = "DB18.314", DataType = "REAL", DbColumnName = "副码3最大力位移" },
-                    new BarcodeColumnConfig { DisplayName = "最大力", Address = "DB18.318", DataType = "REAL", DbColumnName = "副码3最大力" },
-                    new BarcodeColumnConfig { DisplayName = "结果", Address = "DB18.344", DataType = "INT16", DbColumnName = "副码3结果" },
+                    new BarcodeColumnConfig { DisplayName = "FSH码3内容", Address = "DB18.164", DataType = "STRING", DbColumnName = "FSH码3" },
+                    new BarcodeColumnConfig { DisplayName = "装加热塞位移", Address = "DB18.306", DataType = "REAL", DbColumnName = "FSH码3装加热塞位移" },
+                    new BarcodeColumnConfig { DisplayName = "装加热塞力", Address = "DB18.310", DataType = "REAL", DbColumnName = "FSH码3装加热塞力" },
+                    new BarcodeColumnConfig { DisplayName = "最大力位移", Address = "DB18.314", DataType = "REAL", DbColumnName = "FSH码3最大力位移" },
+                    new BarcodeColumnConfig { DisplayName = "最大力", Address = "DB18.318", DataType = "REAL", DbColumnName = "FSH码3最大力" },
+                    new BarcodeColumnConfig { DisplayName = "结果", Address = "DB18.344", DataType = "INT16", DbColumnName = "FSH码3结果" },
                 }
             });
 
             // === 副码4（String[50] at DB18.216） ===
             config.Groups.Add(new CodeGroupConfig
             {
-                GroupName = "副码4",
+                GroupName = "FSH码4",
                 Columns = new List<BarcodeColumnConfig>
                 {
-                    new BarcodeColumnConfig { DisplayName = "副码4内容", Address = "DB18.216", DataType = "STRING", DbColumnName = "副码4" },
-                    new BarcodeColumnConfig { DisplayName = "装加热塞位移", Address = "DB18.322", DataType = "REAL", DbColumnName = "副码4装加热塞位移" },
-                    new BarcodeColumnConfig { DisplayName = "装加热塞力", Address = "DB18.326", DataType = "REAL", DbColumnName = "副码4装加热塞力" },
-                    new BarcodeColumnConfig { DisplayName = "最大力位移", Address = "DB18.330", DataType = "REAL", DbColumnName = "副码4最大力位移" },
-                    new BarcodeColumnConfig { DisplayName = "最大力", Address = "DB18.334", DataType = "REAL", DbColumnName = "副码4最大力" },
-                    new BarcodeColumnConfig { DisplayName = "结果", Address = "DB18.346", DataType = "INT16", DbColumnName = "副码4结果" },
+                    new BarcodeColumnConfig { DisplayName = "FSH码4内容", Address = "DB18.216", DataType = "STRING", DbColumnName = "FSH码4" },
+                    new BarcodeColumnConfig { DisplayName = "装加热塞位移", Address = "DB18.322", DataType = "REAL", DbColumnName = "FSH码4装加热塞位移" },
+                    new BarcodeColumnConfig { DisplayName = "装加热塞力", Address = "DB18.326", DataType = "REAL", DbColumnName = "FSH码4装加热塞力" },
+                    new BarcodeColumnConfig { DisplayName = "最大力位移", Address = "DB18.330", DataType = "REAL", DbColumnName = "FSH码4最大力位移" },
+                    new BarcodeColumnConfig { DisplayName = "最大力", Address = "DB18.334", DataType = "REAL", DbColumnName = "FSH码4最大力" },
+                    new BarcodeColumnConfig { DisplayName = "结果", Address = "DB18.346", DataType = "INT16", DbColumnName = "FSH码4结果" },
                 }
             });
 
@@ -252,7 +252,7 @@ namespace DataBaseOrm
         /// </summary>
         public static string[] GetGroupNames()
         {
-            return new[] { "主码", "副码1", "副码2", "副码3", "副码4", "额外数据" };
+            return new[] { "KSZ码", "FSH码1", "FSH码2", "FSH码3", "FSH码4", "额外数据" };
         }
     }
 }
